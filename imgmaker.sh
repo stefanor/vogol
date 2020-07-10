@@ -27,7 +27,8 @@ mkdir -p ${ROOM}
 
 while /bin/true; do
 	ff_fetch $HOST 11000 ${ROOM}/room.jpg
-	ff_fetch $HOST 13000 ${ROOM}/cam.jpg
-	ff_fetch $HOST 13001 ${ROOM}/grab.jpg
+	ff_fetch $HOST 13000 ${ROOM}/placeholder.jpg
+	ff_fetch $HOST 13001 ${ROOM}/recording.jpg
+	ff_fetch $HOST 13002 ${ROOM}/jitsi.jpg
 	sleep 1
 done
