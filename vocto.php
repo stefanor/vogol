@@ -38,16 +38,20 @@ if (empty($_GET['w']) && empty($argv[1])) {
 </div>
 <table>
 <tr>
-<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="ssp-p"><input type="submit" style="height:50px" value="side-by-side presenter"></form></td>
-<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="ssp-s"><input type="submit" style="height:50px;" value="side-by-side slides"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="R-fs"><input type="submit" style="height:50px" value="Recording fullscreen"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="J-f"><input type="submit" style="height:50px;" value="Jitsi fullscreen"></form></td>
 </tr>
 <tr>
-<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="fs-p"><input type="submit" style="height:50px" value="fullscreen presenter"></form></td>
-<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="fs-s"><input type="submit" style="height:50px" value="fullscreen slides"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="JG-sbs"><input type="submit" style="height:50px" value="Jitsi/Grabber side-by-side"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="GJ-pip"><input type="submit" style="height:50px" value="Grabber/Jitsi picture-in-picture"></form></td>
 </tr>
 <tr>
-<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="nostream"><input type="submit" style="height:50px" value="nostream"></form></td>
-<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="live"><input type="submit" style="height:50px" value="live"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="L-fs"><input type="submit" style="height:50px" value="Loop fullscreen"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="LG-sbs"><input type="submit" style="height:50px" value="Loop/Grabber side-by-side"></form></td>
+</tr>
+<tr>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="nostream"><input type="submit" style="height:50px" value="No stream (stop recording)"></form></td>
+<td>	<form method=GET target="tgt" action="/vocto.php" style="float: left;"><input hidden name="room" value="<?php echo $room;?>"><input hidden name="w" value="live"><input type="submit" style="height:50px" value="Live (record)"></form></td>
 </tr>
 <tr><td colspan=2><img id="output" src="/<?php echo $room;?>/room.jpg" width=480 height=270></td></tr>
 <tr>
@@ -82,10 +86,13 @@ if (empty($_GET['w'])) {
 	$param = $_GET['w'];
 }
 
-if ($param === 'ssp-p') $cmd = array('set_video_a cam1', 'set_video_b grabber', 'set_composite_mode side_by_side_preview');
-if ($param === 'ssp-s') $cmd = array('set_video_b cam1', 'set_video_a grabber', 'set_composite_mode side_by_side_preview');
-if ($param === 'fs-p') $cmd = array('set_video_a cam1', 'set_composite_mode fullscreen');
-if ($param === 'fs-s') $cmd = array('set_video_a grabber', 'set_composite_mode fullscreen');
+if ($param === 'R-fs') $cmd = array('set_video_a recording', 'set_composite_mode fullscreen');
+if ($param === 'J-fs') $cmd = array('set_video_a jitsi', 'set_composite_mode fullscreen');
+if ($param === 'JG-sbs') $cmd = array('set_video_a jitsi', 'set_video_b grabber', 'set_composite_mode side_by_side_equal');
+if ($param === 'GJ-pip') $cmd = array('set_video_a grabber', 'set_video_b jitsi', 'set_composite_mode side_by_side_preview');
+if ($param === 'L-fs') $cmd = array('set_video_a loop', 'set_composite_mode fullscreen');
+if ($param === 'LG-sbs') $cmd = array('set_video_a loop', 'set_video_b grabber', 'set_composite_mode side_by_side_equal');
+
 if ($param === 'nostream') $cmd = array('set_stream_blank pause');
 if ($param === 'live') $cmd = array('set_stream_live');
 
