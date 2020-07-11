@@ -57,15 +57,19 @@ if (empty($_GET['w']) && empty($argv[1])) {
 <tr>
 <td>
 	<img id="loop" src="/<?php echo $room;?>/loop.jpg" width==240 height=135>
+	<p>Loop</p>
 </td>
 <td>
 	<img id="grabber" src="/<?php echo $room;?>/grabber.jpg" width==240 height=135>
+	<p>Grabber</p>
 </td>
 <td>
 	<img id="recording" src="/<?php echo $room;?>/recording.jpg" width==240 height=135>
+	<p>Recording</p>
 </td>
 <td>
 	<img id="jitsi" src="/<?php echo $room;?>/jitsi.jpg" width==240 height=135>
+	<p>Jitsi</p>
 </td>
 </tr>
 <table>
