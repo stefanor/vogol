@@ -52,10 +52,16 @@ if (empty($_GET['w']) && empty($argv[1])) {
 <tr><td colspan=2><img id="output" src="/<?php echo $room;?>/room.jpg" width=480 height=270></td></tr>
 <tr>
 <td>
-	<img id="cam" src="/<?php echo $room;?>/cam.jpg" width==240 height=135>
+	<img id="loop" src="/<?php echo $room;?>/loop.jpg" width==240 height=135>
 </td>
 <td>
-	<img id="grab" src="/<?php echo $room;?>/grab.jpg" width==240 height=135>
+	<img id="grabber" src="/<?php echo $room;?>/grabber.jpg" width==240 height=135>
+</td>
+<td>
+	<img id="recording" src="/<?php echo $room;?>/recording.jpg" width==240 height=135>
+</td>
+<td>
+	<img id="jitsi" src="/<?php echo $room;?>/jitsi.jpg" width==240 height=135>
 </td>
 </tr>
 <table>
