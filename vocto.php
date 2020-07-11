@@ -72,6 +72,8 @@ if (empty($_GET['w']) && empty($argv[1])) {
 <script>var img1 = document.getElementsByTagName('img')[0];var src1=img1.src;img1.addEventListener('load', function() {setTimeout(function() {img1.src=src1+'?'+Date.now()}, 1000)})</script>
 <script>var img2 = document.getElementsByTagName('img')[1];var src2=img2.src;img2.addEventListener('load', function() {setTimeout(function() {img2.src=src2+'?'+Date.now()}, 1000)})</script>
 <script>var img3 = document.getElementsByTagName('img')[2];var src3=img3.src;img3.addEventListener('load', function() {setTimeout(function() {img3.src=src3+'?'+Date.now()}, 1000)})</script>
+<script>var img4 = document.getElementsByTagName('img')[3];var src4=img4.src;img4.addEventListener('load', function() {setTimeout(function() {img4.src=src4+'?'+Date.now()}, 1000)})</script>
+<script>var img5 = document.getElementsByTagName('img')[4];var src5=img5.src;img5.addEventListener('load', function() {setTimeout(function() {img5.src=src5+'?'+Date.now()}, 1000)})</script>
 </script>
 <iframe name="tgt" id="target" width="0" height="0"></iframe>
 </body>
