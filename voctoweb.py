@@ -4,8 +4,9 @@ import configparser
 import logging
 import json
 from asyncio import (
-    CancelledError, create_subprocess_exec, create_task, open_connection,
-    sleep, subprocess, wait_for)
+    CancelledError, create_subprocess_exec, create_task, get_running_loop,
+    open_connection, sleep, subprocess, wait_for)
+from collections import defaultdict
 
 from aiohttp import ClientSession, web
 from jinja2 import Template
@@ -399,12 +400,34 @@ class VoctomixControl:
     async def connect(self, host):
         log.info('Connecting to voctomix control')
         self.reader, self.writer = await open_connection(host, 9999)
+        self.loop = get_running_loop()
         self.state = {}
+        self.response_futures = defaultdict(list)
+        create_task(self.reader_task())
         # Initialize our state
         await self.send('get_config')
         await self.send('get_audio')
         await self.send('get_stream_status')
         await self.send('get_composite_mode_and_video_status')
+
+    async def reader_task(self):
+        """Follow events from the core
+
+        They can arrive at any time.
+        If anyone is waiting for one of them, notify them.
+        """
+        while True:
+            try:
+                line = await self.reader.readline()
+            except CancelledError:
+                return
+            line = line.decode('utf-8').strip()
+            cmd, args = line.split(None, 1)
+            self.update_state(cmd, args)
+            futures = self.response_futures[cmd]
+            while futures:
+                future = futures.pop(0)
+                future.set_result(args)
 
     async def send(self, *command):
         """Send a command to voctomix"""
@@ -431,13 +454,9 @@ class VoctomixControl:
 
     async def expect(self, command):
         """Wait for a particular response from voctomix"""
-        while True:
-            line = await self.reader.readline()
-            line = line.decode('utf-8').strip()
-            cmd, args = line.split(None, 1)
-            self.update_state(cmd, args)
-            if cmd == command:
-                return args
+        future = self.loop.create_future()
+        self.response_futures[command].append(future)
+        return await future
 
     async def action(self, action, source=None, mode=None):
         """Fire an action requested by the client"""
