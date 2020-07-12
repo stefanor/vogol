@@ -4,8 +4,8 @@ import configparser
 import logging
 import json
 from asyncio import (
-    create_subprocess_exec, create_task, open_connection, sleep, subprocess,
-    wait_for)
+    CancelledError, create_subprocess_exec, create_task, open_connection,
+    sleep, subprocess, wait_for)
 
 from aiohttp import ClientSession, web
 from jinja2 import Template
@@ -516,6 +516,8 @@ async def poll_previews(app, source, port):
         try:
             preview = preview_source(host, source, port)
             app['previews'][source] = await wait_for(preview, timeout=10)
+        except CancelledError:
+            return
         except Exception:
             log.exception('Exception previewing source %s', source)
         await sleep(1)
