@@ -49,6 +49,7 @@ INDEX = """
                 <div class="card-body">
                     <div id="stream-status"></div>
                     <button class="btn btn-success" data-action="stream_live">Go Live</button>
+                    <button class="btn btn-danger" data-action="stream_loop">Loop</button>
                     <button class="btn btn-danger" data-action="stream_blank">Blank</button>
                     <br>
                     <button class="btn btn-secondary" data-action="cut">Cut</button>
@@ -371,6 +372,7 @@ class VoctomixControl:
             'set_composite_mode': 'composite_mode_and_video_status',
             'set_stream_blank': 'stream_status',
             'set_stream_live': 'stream_status',
+            'set_stream_loop': 'stream_status',
             'set_video_a': 'video_status',
             'set_video_b': 'video_status',
         }
@@ -401,6 +403,8 @@ class VoctomixControl:
             await self.send('set_stream_live')
         elif action == 'stream_blank':
             await self.send('set_stream_blank', 'nostream')
+        elif action == 'stream_loop':
+            await self.send('set_stream_blank', 'loop')
         elif action == 'cut':
             await self.send('message', 'cut')
         else:
