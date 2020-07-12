@@ -47,19 +47,20 @@ INDEX = """
             <div class="card">
                 <div class="card-header">Stream</div>
                 <div class="card-body">
-                    <div id="stream-status"></div>
                     <button class="btn btn-success" data-action="stream_live">Go Live</button>
                     <button class="btn btn-danger" data-action="stream_loop">Loop</button>
                     <button class="btn btn-danger" data-action="stream_blank">Blank</button>
                     <br>
                     <button class="btn btn-secondary" data-action="cut">Cut</button>
+                    <div>
+                        Stream Status:
+                        <div id="stream-status" class="badge"></div>
+                    </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header">Layout</div>
                 <div class="card-body">
-                    <div id="composite-mode"></div>
-                    <br>
                     <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="fullscreen">Fullscreen</button>
                     <br>
                     <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_equal">Side by Side</button>
@@ -67,6 +68,10 @@ INDEX = """
                     <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_preview">Side by Side Preview</button>
                     <br>
                     <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="picture_in_picture">Picture in Picture</button>
+                    <div>
+                        Layout:
+                        <div id="composite-mode"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -164,9 +169,24 @@ function updateState() {
 function receivedState(state) {
     setCurrentVideo(state.video_a, 'a');
     setCurrentVideo(state.video_b, 'b');
+
     let composite_mode = document.getElementById('composite-mode');
-    composite_mode.innerHTML = state.composite_mode;
+    if (state.composite_mode == 'fullscreen') {
+        composite_mode.innerHTML = 'Full Screen';
+    } else if (state.composite_mode == 'side_by_side_equal') {
+        composite_mode.innerHTML = 'Side by Side';
+    } else if (state.composite_mode == 'side_by_side_preview') {
+        composite_mode.innerHTML = 'Side by Side Preview';
+    } else if (state.composite_mode == 'picture_in_picture') {
+        composite_mode.innerHTML = 'Picture in Picture';
+    }
+
     let stream_status = document.getElementById('stream-status');
+    if (state.stream_status == 'live') {
+        stream_status.className = 'badge badge-success';
+    } else {
+        stream_status.className = 'badge badge-danger';
+    }
     stream_status.innerHTML = state.stream_status;
 }
 
