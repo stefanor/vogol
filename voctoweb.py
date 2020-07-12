@@ -79,7 +79,9 @@ INDEX = """
                 </div>
             {% endfor %}
         </div>
-        <div>Logged in as {{ username }}.</div>
+        {% if session.username %}
+            <div>Logged in as {{ session.username }}.</div>
+        {% endif %}
         <div>Last updated: <span id="last-update"></span></div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -209,7 +211,7 @@ async def root(request):
     session = request['session']
     template = Template(INDEX)
     body = template.render(
-        username=session['username'],
+        session=session,
         sources=request.app['voctomix'].sources,
     )
     return web.Response(body=body, content_type='text/html', charset='utf-8')
@@ -477,7 +479,10 @@ async def preview_source(host, source, port):
 
 
 async def app_factory(config):
-    app = web.Application(middlewares=[session_middleware, auth_middleware])
+    middlewares = [session_middleware]
+    if config.getboolean('require_salsa_auth'):
+        middlewares.append(auth_middleware)
+    app = web.Application(middlewares=middlewares)
     app.add_routes(routes)
     app['sessions'] = {}
     app['config'] = config
