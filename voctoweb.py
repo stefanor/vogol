@@ -85,6 +85,9 @@ INDEX = """
                         <button class="btn btn-warning" data-action="set_a" data-source="{{source}}">A</button>
                         <button class="btn btn-info" data-action="set_b" data-source="{{source}}">B</button>
                         <br>
+                        <button class="btn btn-danger" data-action="mute" data-source="{{source}}">Mute</button>
+                        <button class="btn btn-success" data-action="unmute" data-source="{{source}}">Un-Mute</button>
+                        <br>
                         <div id="audio-{{ source }}" class="badge badge-info"></div>
                     </div>
                 </div>
@@ -416,6 +419,7 @@ class VoctomixControl:
                 'composite_mode_and_video_status',
             'get_stream_status': 'stream_status',
             'message': 'message',
+            'set_audio_volume': 'audio_status',
             'set_composite_mode': 'composite_mode_and_video_status',
             'set_stream_blank': 'stream_status',
             'set_stream_live': 'stream_status',
@@ -452,6 +456,10 @@ class VoctomixControl:
             await self.send('set_stream_blank', 'nostream')
         elif action == 'stream_loop':
             await self.send('set_stream_blank', 'loop')
+        elif action == 'mute':
+            await self.send('set_audio_volume', source, '0')
+        elif action == 'unmute':
+            await self.send('set_audio_volume', source, '1')
         elif action == 'cut':
             await self.send('message', 'cut')
         else:
