@@ -29,6 +29,9 @@ INDEX = """
             width: 240px;
             height: 135px;
         }
+        .selected-source {
+            margin-left: 1em;
+        }
     </style>
 </head>
 <body>
@@ -180,9 +183,9 @@ function setCurrentVideo(source, slot) {
     var badge = document.createElement('div');
     badge.id = 'video-' + slot;
     if (slot == 'a') {
-        badge.className = 'badge badge-primary';
+        badge.className = 'selected-source badge badge-warning';
     } else {
-        badge.className = 'badge badge-secondary';
+        badge.className = 'selected-source badge badge-info';
     }
     badge.dataset.source = source;
     badge.appendChild(document.createTextNode(slot.toUpperCase()));
