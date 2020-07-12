@@ -449,8 +449,6 @@ class VoctomixControl:
     async def close(self):
         self.reader.close()
         self.writer.close()
-        await self.reader.wait_closed()
-        await self.writer.wait_closed()
 
     @property
     def sources(self):
