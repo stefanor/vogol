@@ -169,25 +169,8 @@ function updateState() {
 function receivedState(state) {
     setCurrentVideo(state.video_a, 'a');
     setCurrentVideo(state.video_b, 'b');
-
-    let composite_mode = document.getElementById('composite-mode');
-    if (state.composite_mode == 'fullscreen') {
-        composite_mode.innerHTML = 'Full Screen';
-    } else if (state.composite_mode == 'side_by_side_equal') {
-        composite_mode.innerHTML = 'Side by Side';
-    } else if (state.composite_mode == 'side_by_side_preview') {
-        composite_mode.innerHTML = 'Side by Side Preview';
-    } else if (state.composite_mode == 'picture_in_picture') {
-        composite_mode.innerHTML = 'Picture in Picture';
-    }
-
-    let stream_status = document.getElementById('stream-status');
-    if (state.stream_status == 'live') {
-        stream_status.className = 'badge badge-success';
-    } else {
-        stream_status.className = 'badge badge-danger';
-    }
-    stream_status.innerHTML = state.stream_status;
+    setCompositeMode(state.composite_mode);
+    setStreamStatus(state.stream_status);
 }
 
 // Put the A / B label on the right source
@@ -211,6 +194,29 @@ function setCurrentVideo(source, slot) {
     badge.dataset.source = source;
     badge.appendChild(document.createTextNode(slot.toUpperCase()));
     parent.appendChild(badge);
+}
+
+function setCompositeMode(mode) {
+    let composite_mode = document.getElementById('composite-mode');
+    if (mode == 'fullscreen') {
+        composite_mode.innerHTML = 'Full Screen';
+    } else if (mode == 'side_by_side_equal') {
+        composite_mode.innerHTML = 'Side by Side';
+    } else if (mode == 'side_by_side_preview') {
+        composite_mode.innerHTML = 'Side by Side Preview';
+    } else if (mode == 'picture_in_picture') {
+        composite_mode.innerHTML = 'Picture in Picture';
+    }
+}
+
+function setStreamStatus(status) {
+    let stream_status = document.getElementById('stream-status');
+    if (status == 'live') {
+        stream_status.className = 'badge badge-success';
+    } else {
+        stream_status.className = 'badge badge-danger';
+    }
+    stream_status.innerHTML = status;
 }
 
 let previews = document.getElementsByClassName('preview');
