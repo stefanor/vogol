@@ -200,6 +200,7 @@ for (let button of buttons) {
     button.onclick = actionButton;
 }
 setInterval(updateState, 5000);
+setTimeout(updateState, 0);
 """
 
 log = logging.getLogger('voctoweb')
