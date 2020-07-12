@@ -292,6 +292,8 @@ async def preview_image(request):
 async def action(request):
     data = await request.json()
     voctomix = request.app['voctomix']
+    username = request['session'].get('username', 'anon')
+    log.info('Action by %s: %r', username, data)
 
     await wait_for(voctomix.action(**data), timeout=1)
     return web.json_response(voctomix.state)
@@ -352,6 +354,7 @@ async def login_complete(request):
     session['userinfo'] = userinfo
     salsa_username = userinfo['nickname']
     session['username'] = salsa_username
+    log.info('Login: %s', salsa_username)
 
     next_url = request.cookies.get('next', '/')
     response = web.Response(status=302, headers={'Location': next_url})
