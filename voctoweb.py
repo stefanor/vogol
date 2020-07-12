@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import configparser
+import functools
 import logging
 import json
 from asyncio import (
@@ -99,32 +100,64 @@ INDEX = """
         {% endif %}
         <div>Last updated: <span id="last-update"></span></div>
     </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="login-modal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Logged out</h5>
+          </div>
+          <div class="modal-body">
+            <p>Login through Salsa</p>
+          </div>
+          <div class="modal-footer">
+            <a href="/login" class="btn btn-primary">Login</a>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
     <script src="/voctoweb.js"></script>
+    <script>
+        {% if logged_in %}
+            startup();
+        {% else %}
+            showLoginDialog();
+        {% endif %}
+    </script>
 </body>
 </html>
 """
 
 JS = """
 'use strict';
+
+const updateIntervals = [];
+
+function startup() {
+    const previews = document.getElementsByClassName('preview');
+    for (const preview of previews) {
+        updateIntervals.push(setInterval(updatePreview, 2000, preview));
+        setTimeout(updatePreview, 0, preview);
+    }
+
+    const buttons = document.getElementsByTagName('button');
+    for (const button of buttons) {
+        button.onclick = actionButton;
+    }
+    updateIntervals.push(setInterval(updateState, 5000));
+    setTimeout(updateState, 0);
+}
+
 function updatePreview(img) {
     const source = img.dataset.source;
     const url = '/preview/' + source;
     fetch(url, {
         credentials: 'same-origin',
-        redirect: 'manual',
-    }).then(response => {
-        if (response.type == 'opaqueredirect') {
-            console.log('Preview 302ed. Presumably logged out. Reloading');
-            location.reload();
-        }
-        if (!response.ok) {
-            throw new Error('Failed to get preview');
-        }
-        return response.blob();
-    }).then(response => {
+    }).then(checkResponse)
+    .then(response => response.blob())
+    .then(response => {
         if (response) {
             const objectURL = URL.createObjectURL(response);
             img.src = objectURL;
@@ -142,6 +175,26 @@ function updateTimestamp() {
     last_updated.innerHTML = new Date();
 }
 
+function checkResponse(response) {
+    if (response.status == 403) {
+        showLoginDialog();
+    }
+    if (!response.ok) {
+        throw new Error('Failed to get ' + response.url);
+    }
+    return response;
+}
+
+// We're not logged in:
+function showLoginDialog() {
+    // Stop hitting the server
+    while(updateIntervals.length > 0) {
+        const interval = updateIntervals.shift();
+        clearInterval(interval);
+    }
+    $('#login-modal').modal();
+}
+
 // Handle an action click
 function actionButton(event) {
     const button = event.target;
@@ -152,11 +205,9 @@ function actionButton(event) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(button.dataset),
-    })
+    }).then(checkResponse)
     .then(response => response.json())
-    .then(data => {
-        receivedState(data);
-    });
+    .then(receivedState);
 }
 
 // Request state from Voctomix
@@ -164,11 +215,9 @@ function updateState() {
     fetch('/state', {
         credentials: 'same-origin',
         method: 'GET',
-    })
+    }).then(checkResponse)
     .then(response => response.json())
-    .then(data => {
-        receivedState(data);
-    });
+    .then(receivedState);
 }
 
 // Received state from Voctomix
@@ -240,31 +289,32 @@ function setAudioStatus(status) {
         }
     }
 }
-
-const previews = document.getElementsByClassName('preview');
-for (const preview of previews) {
-    setInterval(updatePreview, 2000, preview);
-    setTimeout(updatePreview, 0, preview);
-}
-
-const buttons = document.getElementsByTagName('button');
-for (const button of buttons) {
-    button.onclick = actionButton;
-}
-setInterval(updateState, 5000);
-setTimeout(updateState, 0);
 """
 
 log = logging.getLogger('voctoweb')
 routes = web.RouteTableDef()
 
 
+def require_login(func):
+    """Decorator to mark a route as requiring login"""
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        return func(*args, **kwargs)
+    wrapped.require_login = True
+    return wrapped
+
+
 @routes.get('/')
 async def root(request):
     session = request['session']
     template = Template(INDEX)
+    if request.app['config'].getboolean('require_salsa_auth'):
+        logged_in = 'username' in session
+    else:
+        logged_in = True
     body = template.render(
         session=session,
+        logged_in=logged_in,
         sources=request.app['voctomix'].sources,
     )
     return web.Response(body=body, content_type='text/html', charset='utf-8')
@@ -277,6 +327,7 @@ async def js(request):
 
 
 @routes.get('/preview/{source:[a-z0-9-]+}')
+@require_login
 async def preview_image(request):
     source = request.match_info['source']
     preview = request.app['previews'].get(source)
@@ -288,7 +339,9 @@ async def preview_image(request):
         headers={'Cache-Control': 'no-cache'},
     )
 
+
 @routes.post('/action')
+@require_login
 async def action(request):
     data = await request.json()
     voctomix = request.app['voctomix']
@@ -300,6 +353,7 @@ async def action(request):
 
 
 @routes.get('/state')
+@require_login
 async def state(request):
     voctomix = request.app['voctomix']
     return web.json_response(
@@ -356,9 +410,7 @@ async def login_complete(request):
     session['username'] = salsa_username
     log.info('Login: %s', salsa_username)
 
-    next_url = request.cookies.get('next', '/')
-    response = web.Response(status=302, headers={'Location': next_url})
-    response.del_cookie('next')
+    response = web.Response(status=302, headers={'Location': '/'})
     response.del_cookie('oauth2-state')
     return response
 
@@ -389,13 +441,9 @@ async def session_middleware(request, handler):
 
 @web.middleware
 async def auth_middleware(request, handler):
-    """Require login to all URLs except /login.*"""
-    if not request.path.startswith('/login'):
+    if getattr(handler, 'require_login', False):
         if 'username' not in request['session']:
-            response = web.Response(
-                status=302, headers={'Location': '/login'})
-            response.set_cookie('next', request.path, httponly=True)
-            return response
+            raise web.HTTPForbidden()
     return await handler(request)
 
 
