@@ -1,0 +1,11 @@
+[Unit]
+Description=Voctomix Web UI
+
+[Service]
+ExecStart=/usr/local/bin/voctoweb
+Restart=always
+RestartSec=1s
+Nice=0
+
+[Install]
+WantedBy=multi-user.target
