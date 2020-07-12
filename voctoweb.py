@@ -104,8 +104,8 @@ INDEX = """
 JS = """
 'use strict';
 function updatePreview(img) {
-    let source = img.dataset.source;
-    let url = '/preview/' + source;
+    const source = img.dataset.source;
+    const url = '/preview/' + source;
     fetch(url, {
         credentials: 'same-origin',
         redirect: 'manual',
@@ -120,7 +120,7 @@ function updatePreview(img) {
         return response.blob();
     }).then(response => {
         if (response) {
-            let objectURL = URL.createObjectURL(response);
+            const objectURL = URL.createObjectURL(response);
             img.src = objectURL;
             updateTimestamp();
         }
@@ -132,13 +132,13 @@ function updatePreview(img) {
 }
 
 function updateTimestamp() {
-    let last_updated = document.getElementById('last-update');
+    const last_updated = document.getElementById('last-update');
     last_updated.innerHTML = new Date();
 }
 
 // Handle an action click
 function actionButton(event) {
-    let button = event.target;
+    const button = event.target;
     fetch('/action', {
         credentials: 'same-origin',
         method: 'POST',
@@ -175,7 +175,7 @@ function receivedState(state) {
 
 // Put the A / B label on the right source
 function setCurrentVideo(source, slot) {
-    let tag = document.getElementById('video-' + slot);
+    const tag = document.getElementById('video-' + slot);
     if (tag) {
         if (tag.dataset.source == source) {
             return;
@@ -183,8 +183,8 @@ function setCurrentVideo(source, slot) {
             tag.remove();
         }
     }
-    let parent = document.getElementById('header-' + source);
-    var badge = document.createElement('div');
+    const parent = document.getElementById('header-' + source);
+    const badge = document.createElement('div');
     badge.id = 'video-' + slot;
     if (slot == 'a') {
         badge.className = 'selected-source badge badge-warning';
@@ -197,7 +197,7 @@ function setCurrentVideo(source, slot) {
 }
 
 function setCompositeMode(mode) {
-    let composite_mode = document.getElementById('composite-mode');
+    const composite_mode = document.getElementById('composite-mode');
     if (mode == 'fullscreen') {
         composite_mode.innerHTML = 'Full Screen';
     } else if (mode == 'side_by_side_equal') {
@@ -210,7 +210,7 @@ function setCompositeMode(mode) {
 }
 
 function setStreamStatus(status) {
-    let stream_status = document.getElementById('stream-status');
+    const stream_status = document.getElementById('stream-status');
     if (status == 'live') {
         stream_status.className = 'badge badge-success';
     } else {
@@ -219,14 +219,20 @@ function setStreamStatus(status) {
     stream_status.innerHTML = status;
 }
 
-let previews = document.getElementsByClassName('preview');
-for (let preview of previews) {
+function setAudioStatus(status) {
+    for (const source in status) {
+        const volume = status[source];
+    }
+}
+
+const previews = document.getElementsByClassName('preview');
+for (const preview of previews) {
     setInterval(updatePreview, 2000, preview);
     setTimeout(updatePreview, 0, preview);
 }
 
-let buttons = document.getElementsByTagName('button');
-for (let button of buttons) {
+const buttons = document.getElementsByTagName('button');
+for (const button of buttons) {
     button.onclick = actionButton;
 }
 setInterval(updateState, 5000);
