@@ -84,6 +84,8 @@ INDEX = """
                         <button class="btn btn-primary" data-action="fullscreen" data-source="{{source}}">Fullscreen</button>
                         <button class="btn btn-warning" data-action="set_a" data-source="{{source}}">A</button>
                         <button class="btn btn-info" data-action="set_b" data-source="{{source}}">B</button>
+                        <br>
+                        <div id="audio-{{ source }}" class="badge badge-info"></div>
                     </div>
                 </div>
             {% endfor %}
@@ -171,6 +173,7 @@ function receivedState(state) {
     setCurrentVideo(state.video_b, 'b');
     setCompositeMode(state.composite_mode);
     setStreamStatus(state.stream_status);
+    setAudioStatus(state.audio);
 }
 
 // Put the A / B label on the right source
@@ -222,6 +225,15 @@ function setStreamStatus(status) {
 function setAudioStatus(status) {
     for (const source in status) {
         const volume = status[source];
+        const element = document.getElementById('audio-' + source);
+        const intVolume = Math.trunc(volume * 100) + '%';
+        if (volume > 0.2) {
+            element.className = 'badge badge-success';
+            element.innerHTML = '🔊 ' + intVolume;
+        } else {
+            element.className = 'badge badge-danger';
+            element.innerHTML = '🔇 ' + intVolume;
+        }
     }
 }
 
@@ -385,7 +397,9 @@ class VoctomixControl:
         log.info('Connecting to voctomix control')
         self.reader, self.writer = await open_connection(host, 9999)
         self.state = {}
+        # Initialize our state
         await self.send('get_config')
+        await self.send('get_audio')
         await self.send('get_stream_status')
         await self.send('get_composite_mode_and_video_status')
 
@@ -396,6 +410,7 @@ class VoctomixControl:
         self.writer.write(b'\n')
         await self.writer.drain()
         last_responses = {
+            'get_audio': 'audio_status',
             'get_config': 'server_config',
             'get_composite_mode_and_video_status':
                 'composite_mode_and_video_status',
@@ -446,6 +461,8 @@ class VoctomixControl:
         """Update our view of Voctomix's state, based on a received message"""
         if cmd == 'server_config':
             self.config = json.loads(args)
+        elif cmd == 'audio_status':
+            self.state['audio'] = json.loads(args)
         elif cmd == 'composite_mode_and_video_status':
             mode, a, b = args.split()
             self.state['video_a'] = a
