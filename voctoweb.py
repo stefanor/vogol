@@ -10,286 +10,10 @@ from asyncio import (
 from collections import defaultdict
 
 from aiohttp import ClientSession, web
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from oauthlib.oauth2 import WebApplicationClient
 from oauthlib.common import generate_token
 
-INDEX = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>VoctoWeb.py</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <style>
-        img.room {
-            width: 320px;
-            height: 180px;
-        }
-        img.source {
-            display: block;
-            width: 240px;
-            height: 135px;
-        }
-        .selected-source {
-            margin-left: 1em;
-        }
-    </style>
-</head>
-<body>
-    <div class="content">
-        <h1>VoctoWeb</h1>
-        <div class="row">
-            <div class="card">
-                <div class="card-header">Mixed Output</div>
-                <div class="card-body">
-                    <img class="preview room" id="loop" data-source="room">
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Stream</div>
-                <div class="card-body">
-                    <button class="btn btn-success" data-action="stream_live">Go Live</button>
-                    <button class="btn btn-danger" data-action="stream_loop">Loop</button>
-                    <button class="btn btn-danger" data-action="stream_blank">Blank</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="cut">Cut</button>
-                    <div>
-                        Stream Status:
-                        <div id="stream-status" class="badge"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Layout</div>
-                <div class="card-body">
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="fullscreen">Fullscreen</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_equal">Side by Side</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_preview">Side by Side Preview</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="picture_in_picture">Picture in Picture</button>
-                    <div>
-                        Layout:
-                        <div id="composite-mode"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            {% for source in sources %}
-                <div class="card">
-                    <div class="card-header" id="header-{{ source }}">{{ source|title }}</div>
-                    <div class="card-body">
-                        <img class="preview source" id="loop" data-source="{{source}}">
-                        <button class="btn btn-primary" data-action="fullscreen" data-source="{{source}}">Fullscreen</button>
-                        <button class="btn btn-warning" data-action="set_a" data-source="{{source}}">A</button>
-                        <button class="btn btn-info" data-action="set_b" data-source="{{source}}">B</button>
-                        <br>
-                        <button class="btn btn-danger" data-action="mute" data-source="{{source}}">Mute</button>
-                        <button class="btn btn-success" data-action="unmute" data-source="{{source}}">Un-Mute</button>
-                        <br>
-                        <div id="audio-{{ source }}" class="badge badge-info"></div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        {% if session.username %}
-            <div>Logged in as {{ session.username }}.</div>
-        {% endif %}
-        <div>Last updated: <span id="last-update"></span></div>
-    </div>
-    <div class="modal fade" tabindex="-1" role="dialog" id="login-modal" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Logged out</h5>
-          </div>
-          <div class="modal-body">
-            <p>Login through Salsa</p>
-          </div>
-          <div class="modal-footer">
-            <a href="/login" class="btn btn-primary">Login</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
-    <script src="/voctoweb.js"></script>
-    <script>
-        {% if logged_in %}
-            startup();
-        {% else %}
-            showLoginDialog();
-        {% endif %}
-    </script>
-</body>
-</html>
-"""
-
-JS = """
-'use strict';
-
-const updateIntervals = [];
-
-function startup() {
-    const previews = document.getElementsByClassName('preview');
-    for (const preview of previews) {
-        updateIntervals.push(setInterval(updatePreview, 2000, preview));
-        setTimeout(updatePreview, 0, preview);
-    }
-
-    const buttons = document.getElementsByTagName('button');
-    for (const button of buttons) {
-        button.onclick = actionButton;
-    }
-    updateIntervals.push(setInterval(updateState, 5000));
-    setTimeout(updateState, 0);
-}
-
-function updatePreview(img) {
-    const source = img.dataset.source;
-    const url = '/preview/' + source;
-    fetch(url, {
-        credentials: 'same-origin',
-    }).then(checkResponse)
-    .then(response => response.blob())
-    .then(response => {
-        if (response) {
-            const objectURL = URL.createObjectURL(response);
-            img.src = objectURL;
-            updateTimestamp();
-        }
-    }).catch(error => {
-        // FIXME
-        //console.error('Failed to fetch', source);
-        //img.src = URL.createObjectURL('');
-    });
-}
-
-function updateTimestamp() {
-    const last_updated = document.getElementById('last-update');
-    last_updated.innerHTML = new Date();
-}
-
-function checkResponse(response) {
-    if (response.status == 403) {
-        showLoginDialog();
-    }
-    if (!response.ok) {
-        throw new Error('Failed to get ' + response.url);
-    }
-    return response;
-}
-
-// We're not logged in:
-function showLoginDialog() {
-    // Stop hitting the server
-    while(updateIntervals.length > 0) {
-        const interval = updateIntervals.shift();
-        clearInterval(interval);
-    }
-    $('#login-modal').modal();
-}
-
-// Handle an action click
-function actionButton(event) {
-    const button = event.target;
-    fetch('/action', {
-        credentials: 'same-origin',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(button.dataset),
-    }).then(checkResponse)
-    .then(response => response.json())
-    .then(receivedState);
-}
-
-// Request state from Voctomix
-function updateState() {
-    fetch('/state', {
-        credentials: 'same-origin',
-        method: 'GET',
-    }).then(checkResponse)
-    .then(response => response.json())
-    .then(receivedState);
-}
-
-// Received state from Voctomix
-function receivedState(state) {
-    setCurrentVideo(state.video_a, 'a');
-    setCurrentVideo(state.video_b, 'b');
-    setCompositeMode(state.composite_mode);
-    setStreamStatus(state.stream_status);
-    setAudioStatus(state.audio);
-}
-
-// Put the A / B label on the right source
-function setCurrentVideo(source, slot) {
-    const tag = document.getElementById('video-' + slot);
-    if (tag) {
-        if (tag.dataset.source == source) {
-            return;
-        } else {
-            tag.remove();
-        }
-    }
-    const parent = document.getElementById('header-' + source);
-    const badge = document.createElement('div');
-    badge.id = 'video-' + slot;
-    if (slot == 'a') {
-        badge.className = 'selected-source badge badge-warning';
-    } else {
-        badge.className = 'selected-source badge badge-info';
-    }
-    badge.dataset.source = source;
-    badge.appendChild(document.createTextNode(slot.toUpperCase()));
-    parent.appendChild(badge);
-}
-
-function setCompositeMode(mode) {
-    const composite_mode = document.getElementById('composite-mode');
-    if (mode == 'fullscreen') {
-        composite_mode.innerHTML = 'Full Screen';
-    } else if (mode == 'side_by_side_equal') {
-        composite_mode.innerHTML = 'Side by Side';
-    } else if (mode == 'side_by_side_preview') {
-        composite_mode.innerHTML = 'Side by Side Preview';
-    } else if (mode == 'picture_in_picture') {
-        composite_mode.innerHTML = 'Picture in Picture';
-    }
-}
-
-function setStreamStatus(status) {
-    const stream_status = document.getElementById('stream-status');
-    if (status == 'live') {
-        stream_status.className = 'badge badge-success';
-    } else {
-        stream_status.className = 'badge badge-danger';
-    }
-    stream_status.innerHTML = status;
-}
-
-function setAudioStatus(status) {
-    for (const source in status) {
-        const volume = status[source];
-        const element = document.getElementById('audio-' + source);
-        const intVolume = Math.trunc(volume * 100) + '%';
-        if (volume > 0.2) {
-            element.className = 'badge badge-success';
-            element.innerHTML = '🔊 ' + intVolume;
-        } else {
-            element.className = 'badge badge-danger';
-            element.innerHTML = '🔇 ' + intVolume;
-        }
-    }
-}
-"""
 
 log = logging.getLogger('voctoweb')
 routes = web.RouteTableDef()
@@ -307,7 +31,7 @@ def require_login(func):
 @routes.get('/')
 async def root(request):
     session = request['session']
-    template = Template(INDEX)
+    template = request.app['jinja_env'].get_template('index.html.j2')
     if request.app['config'].getboolean('require_salsa_auth'):
         logged_in = 'username' in session
     else:
@@ -322,8 +46,7 @@ async def root(request):
 
 @routes.get('/voctoweb.js')
 async def js(request):
-    return web.Response(
-        body=JS, content_type='text/javascript', charset='utf-8')
+    return web.FileResponse('static/voctoweb.js')
 
 
 @routes.get('/preview/{source:[a-z0-9-]+}')
@@ -621,6 +344,10 @@ async def app_factory(config):
     app.add_routes(routes)
     app['sessions'] = {}
     app['config'] = config
+    app['jinja_env'] = Environment(
+        loader=FileSystemLoader('templates'),
+        autoescape=select_autoescape(['html'])
+    )
     app.on_startup.append(connect_voctomix)
     app.on_cleanup.append(stop_polling_previews)
     return app
