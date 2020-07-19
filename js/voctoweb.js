@@ -156,3 +156,6 @@ function setAudioStatus(status) {
         }
     }
 }
+
+window.startup = startup;
+window.showLoginDialog = showLoginDialog;

@@ -2,5 +2,8 @@
 .*.swp
 /*.egg-info/
 /build/
+/node_module/
 /dist/
+/static/
+/ve/
 __pycache__/

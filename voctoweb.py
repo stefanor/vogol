@@ -44,9 +44,10 @@ async def root(request):
     return web.Response(body=body, content_type='text/html', charset='utf-8')
 
 
-@routes.get('/voctoweb.js')
-async def js(request):
-    return web.FileResponse('static/voctoweb.js')
+@routes.get('/static/{filename:[a-z0-9.-]+}')
+async def static(request):
+    filename = request.match_info['filename']
+    return web.FileResponse(f'static/{filename}')
 
 
 @routes.get('/preview/{source:[a-z0-9-]+}')

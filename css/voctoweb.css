@@ -1,0 +1,12 @@
+img.room {
+	width: 320px;
+	height: 180px;
+}
+img.source {
+	display: block;
+	width: 240px;
+	height: 135px;
+}
+.selected-source {
+	margin-left: 1em;
+}

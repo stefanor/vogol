@@ -1,0 +1,17 @@
+{
+  "name": "voctoweb",
+  "type": "commonjs",
+  "license": "GPL-3+",
+  "private": true,
+  "version": "0.0.0",
+  "devDependencies": {
+    "bootstrap": "4.x",
+    "jquery": "3.x",
+    "popper.js": "1.x",
+    "webpack": "4.x",
+    "webpack-cli": "3.x"
+  },
+  "scripts": {
+    "build": "cp -f node_modules/bootstrap/dist/css/bootstrap.min.css css/voctoweb.css static && npx webpack"
+  }
+}
