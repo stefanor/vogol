@@ -1,0 +1,104 @@
+import functools
+import logging
+
+from aiohttp import ClientSession, web
+from oauthlib.oauth2 import WebApplicationClient
+from oauthlib.common import generate_token
+
+
+log = logging.getLogger(__name__)
+routes = web.RouteTableDef()
+
+
+def require_login(func):
+    """Decorator to mark a route as requiring login"""
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        return func(*args, **kwargs)
+    wrapped.require_login = True
+    return wrapped
+
+
+@web.middleware
+async def auth_middleware(request, handler):
+    if getattr(handler, 'require_login', False):
+        if 'username' not in request['session']:
+            raise web.HTTPForbidden()
+    return await handler(request)
+
+
+@web.middleware
+async def session_middleware(request, handler):
+    """A simple in-memory session store"""
+    sessions = request.app['sessions']
+    session = {}
+    sessionid = request.cookies.get('sessionid')
+    if sessionid:
+        session = sessions.get(sessionid, {})
+    request['session'] = session
+
+    response = await handler(request)
+
+    if session:
+        if not sessionid:
+            sessionid = generate_token()
+            response.set_cookie('sessionid', sessionid, httponly=True)
+        sessions[sessionid] = session
+    else:
+        if sessionid:
+            response.del_cookie('sessionid')
+            sessions.pop(sessionid, None)
+    return response
+
+
+@routes.get('/login')
+async def login(request):
+    config = request.app['config']
+    redirect_uri = f'{config["server_url"]}/login/complete'
+    client = WebApplicationClient(config['salsa_client_id'])
+    state = generate_token()
+    dest = client.prepare_request_uri(
+        'https://salsa.debian.org/oauth/authorize', state=state,
+        scope='openid', redirect_uri=redirect_uri)
+    response = web.Response(status=302, headers={'Location': dest})
+    response.set_cookie('oauth2-state', state, httponly=True)
+    return response
+
+
+@routes.get('/login/complete')
+async def login_complete(request):
+    config = request.app['config']
+    redirect_uri = f'{config["server_url"]}/login/complete'
+    state = request.cookies['oauth2-state']
+    client = WebApplicationClient(config['salsa_client_id'])
+    result = client.parse_request_uri_response(
+        f'{config["server_url"]}{request.path_qs}', state)
+    code = result['code']
+    async with ClientSession() as session:
+        r = await session.post('https://salsa.debian.org/oauth/token', data={
+            'client_id': config['salsa_client_id'],
+            'client_secret': config['salsa_client_secret'],
+            'code': code,
+            'redirect_uri': redirect_uri,
+            'grant_type': 'authorization_code',
+        })
+        if not r.status == 200:
+            raise Exception('Failed to retrieve OAuth2 token')
+        token = await r.json()
+
+        auth_headers = {'Authorization': f'Bearer {token["access_token"]}'}
+        r = await session.get('https://salsa.debian.org/oauth/userinfo',
+                              headers=auth_headers)
+        if not r.status == 200:
+            raise Exception('Failed to retrieve UserInfo')
+        userinfo = await r.json()
+
+    session = request['session']
+    session['userinfo'] = userinfo
+    salsa_username = userinfo['nickname']
+    session['username'] = salsa_username
+    log.info('Login: %s', salsa_username)
+
+    response = web.Response(status=302, headers={'Location': '/'})
+    response.del_cookie('oauth2-state')
+    return response
