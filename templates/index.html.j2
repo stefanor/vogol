@@ -1,98 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>VoctoWeb.py</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="/static/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/voctoweb.css">
+  <title>VoctoWeb.py</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="/static/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/voctoweb.css">
 </head>
 <body>
-    <div class="content">
-        <h1>VoctoWeb</h1>
-        <div class="row">
-            <div class="card">
-                <div class="card-header">Mixed Output</div>
-                <div class="card-body">
-                    <img class="preview room" id="loop" data-source="room">
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Stream</div>
-                <div class="card-body">
-                    <button class="btn btn-success" data-action="stream_live">Go Live</button>
-                    <button class="btn btn-danger" data-action="stream_loop">Loop</button>
-                    <button class="btn btn-danger" data-action="stream_blank">Blank</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="cut">Cut</button>
-                    <div>
-                        Stream Status:
-                        <div id="stream-status" class="badge"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Layout</div>
-                <div class="card-body">
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="fullscreen">Fullscreen</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_equal">Side by Side</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_preview">Side by Side Preview</button>
-                    <br>
-                    <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="picture_in_picture">Picture in Picture</button>
-                    <div>
-                        Layout:
-                        <div id="composite-mode"></div>
-                    </div>
-                </div>
-            </div>
+  <div class="content">
+    <h1>VoctoWeb</h1>
+    <div class="row">
+      <div class="card">
+        <div class="card-header">Mixed Output</div>
+        <div class="card-body">
+          <img class="preview room" id="loop" data-source="room">
         </div>
-        <div class="row">
-            {% for source in sources %}
-                <div class="card">
-                    <div class="card-header" id="header-{{ source }}">{{ source|title }}</div>
-                    <div class="card-body">
-                        <img class="preview source" id="loop" data-source="{{source}}">
-                        <button class="btn btn-primary" data-action="fullscreen" data-source="{{source}}">Fullscreen</button>
-                        <button class="btn btn-warning" data-action="set_a" data-source="{{source}}">A</button>
-                        <button class="btn btn-info" data-action="set_b" data-source="{{source}}">B</button>
-                        <br>
-                        <button class="btn btn-danger" data-action="mute" data-source="{{source}}">Mute</button>
-                        <button class="btn btn-success" data-action="unmute" data-source="{{source}}">Un-Mute</button>
-                        <br>
-                        <div id="audio-{{ source }}" class="badge badge-info"></div>
-                    </div>
-                </div>
-            {% endfor %}
+      </div>
+      <div class="card">
+        <div class="card-header">Stream</div>
+        <div class="card-body">
+          <button class="btn btn-success" data-action="stream_live">Go Live</button>
+          <button class="btn btn-danger" data-action="stream_loop">Loop</button>
+          <button class="btn btn-danger" data-action="stream_blank">Blank</button>
+          <br>
+          <button class="btn btn-secondary" data-action="cut">Cut</button>
+          <div>
+            Stream Status:
+            <div id="stream-status" class="badge"></div>
+          </div>
         </div>
-        {% if session.username %}
-            <div>Logged in as {{ session.username }}.</div>
-        {% endif %}
-        <div>Last updated: <span id="last-update"></span></div>
-    </div>
-    <div class="modal fade" tabindex="-1" role="dialog" id="login-modal" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Logged out</h5>
-          </div>
-          <div class="modal-body">
-            <p>Login through Salsa</p>
-          </div>
-          <div class="modal-footer">
-            <a href="/login" class="btn btn-primary">Login</a>
+      </div>
+      <div class="card">
+        <div class="card-header">Layout</div>
+        <div class="card-body">
+          <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="fullscreen">Fullscreen</button>
+          <br>
+          <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_equal">Side by Side</button>
+          <br>
+          <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="side_by_side_preview">Side by Side Preview</button>
+          <br>
+          <button class="btn btn-secondary" data-action="set_composite_mode" data-mode="picture_in_picture">Picture in Picture</button>
+          <div>
+            Layout:
+            <div id="composite-mode"></div>
           </div>
         </div>
       </div>
     </div>
-    <script src="/static/vendor.bundle.js"></script>
-    <script src="/static/voctoweb.bundle.js"></script>
-    <script>
-        {% if logged_in %}
-            startup();
-        {% else %}
-            showLoginDialog();
-        {% endif %}
-    </script>
+    <div class="row">
+      {% for source in sources %}
+        <div class="card">
+          <div class="card-header" id="header-{{ source }}">{{ source|title }}</div>
+          <div class="card-body">
+            <img class="preview source" id="loop" data-source="{{source}}">
+            <button class="btn btn-primary" data-action="fullscreen" data-source="{{source}}">Fullscreen</button>
+            <button class="btn btn-warning" data-action="set_a" data-source="{{source}}">A</button>
+            <button class="btn btn-info" data-action="set_b" data-source="{{source}}">B</button>
+            <br>
+            <button class="btn btn-danger" data-action="mute" data-source="{{source}}">Mute</button>
+            <button class="btn btn-success" data-action="unmute" data-source="{{source}}">Un-Mute</button>
+            <br>
+            <div id="audio-{{ source }}" class="badge badge-info"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% if session.username %}
+      <div>Logged in as {{ session.username }}.</div>
+    {% endif %}
+    <div>Last updated: <span id="last-update"></span></div>
+  </div>
+  <div class="modal fade" tabindex="-1" role="dialog" id="login-modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Logged out</h5>
+        </div>
+        <div class="modal-body">
+          <p>Login through Salsa</p>
+        </div>
+        <div class="modal-footer">
+          <a href="/login" class="btn btn-primary">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/vendor.bundle.js"></script>
+  <script src="/static/voctoweb.bundle.js"></script>
+  <script>
+    {% if logged_in %}
+      startup();
+    {% else %}
+      showLoginDialog();
+    {% endif %}
+  </script>
 </body>
 </html>
