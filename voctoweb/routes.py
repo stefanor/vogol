@@ -1,7 +1,7 @@
 import logging
 from asyncio import wait_for
 
-from aiohttp import web
+from aiohttp import hdrs, web
 
 from voctoweb.auth import require_login
 
@@ -42,7 +42,7 @@ async def preview_image(request):
     return web.Response(
         body=preview,
         content_type='image/jpeg',
-        headers={'Cache-Control': 'no-cache'},
+        headers={hdrs.CACHE_CONTROL: 'no-cache'},
     )
 
 
@@ -64,5 +64,5 @@ async def state(request):
     voctomix = request.app['voctomix']
     return web.json_response(
         voctomix.state,
-        headers={'Cache-Control': 'no-cache'},
+        headers={hdrs.CACHE_CONTROL: 'no-cache'},
     )

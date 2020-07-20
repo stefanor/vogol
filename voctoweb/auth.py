@@ -1,7 +1,7 @@
 import functools
 import logging
 
-from aiohttp import ClientSession, web
+from aiohttp import ClientSession, hdrs, web
 from oauthlib.oauth2 import WebApplicationClient
 from oauthlib.common import generate_token
 
@@ -60,7 +60,7 @@ async def login(request):
     dest = client.prepare_request_uri(
         'https://salsa.debian.org/oauth/authorize', state=state,
         scope='openid', redirect_uri=redirect_uri)
-    response = web.Response(status=302, headers={'Location': dest})
+    response = web.Response(status=302, headers={hdrs.LOCATION: dest})
     response.set_cookie('oauth2-state', state, httponly=True)
     return response
 
@@ -86,7 +86,7 @@ async def login_complete(request):
             raise Exception('Failed to retrieve OAuth2 token')
         token = await r.json()
 
-        auth_headers = {'Authorization': f'Bearer {token["access_token"]}'}
+        auth_headers = {hdrs.AUTHORIZATION: f'Bearer {token["access_token"]}'}
         r = await session.get('https://salsa.debian.org/oauth/userinfo',
                               headers=auth_headers)
         if not r.status == 200:
@@ -99,6 +99,6 @@ async def login_complete(request):
     session['username'] = salsa_username
     log.info('Login: %s', salsa_username)
 
-    response = web.Response(status=302, headers={'Location': '/'})
+    response = web.Response(status=302, headers={hdrs.LOCATION: '/'})
     response.del_cookie('oauth2-state')
     return response
