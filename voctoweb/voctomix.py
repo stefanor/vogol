@@ -101,6 +101,7 @@ class VoctomixControl:
         """Update our view of Voctomix's state, based on a received message"""
         if cmd == 'server_config':
             self.config = json.loads(args)
+            self.state['sources'] = self.config['mix']['sources'].split(',')
         elif cmd == 'audio_status':
             self.state['audio'] = json.loads(args)
         elif cmd == 'composite_mode_and_video_status':
@@ -121,7 +122,7 @@ class VoctomixControl:
 
     @property
     def sources(self):
-        return self.config['mix']['sources'].split(',')
+        return self.state['sources']
 
 
 async def connect_voctomix(app):

@@ -1,5 +1,4 @@
 from aiohttp import web
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from voctoweb.auth import auth_middleware, auth_routes, session_middleware
 from voctoweb.routes import routes
@@ -16,10 +15,6 @@ async def app_factory(config):
     app.add_routes(auth_routes)
     app['sessions'] = {}
     app['config'] = config
-    app['jinja_env'] = Environment(
-        loader=FileSystemLoader('templates'),
-        autoescape=select_autoescape(['html'])
-    )
     app.on_startup.append(connect_voctomix)
     app.on_cleanup.append(stop_polling_previews)
     return app

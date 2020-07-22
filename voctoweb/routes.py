@@ -12,24 +12,21 @@ routes = web.RouteTableDef()
 
 @routes.get('/')
 async def root(request):
-    session = request['session']
-    template = request.app['jinja_env'].get_template('index.html.j2')
-    if request.app['config'].getboolean('require_salsa_auth'):
-        logged_in = 'username' in session
-    else:
-        logged_in = True
-    body = template.render(
-        session=session,
-        logged_in=logged_in,
-        sources=request.app['voctomix'].sources,
-    )
-    return web.Response(body=body, content_type='text/html', charset='utf-8')
+    return web.FileResponse('frontend/dist/index.html', headers={
+        hdrs.CONTENT_TYPE: 'text/html; charset=utf-8'})
 
 
-@routes.get('/static/{filename:[a-z0-9.-]+}')
+@routes.get('/favicon.ico')
+async def favicon(request):
+    return web.FileResponse('frontend/dist/favicon.ico', headers={
+        hdrs.CONTENT_TYPE: 'image/vnd.microsoft.icon'})
+
+
+@routes.get('/{component:(js|css)}/{filename:[a-z0-9.-]+}')
 async def static(request):
+    component = request.match_info['component']
     filename = request.match_info['filename']
-    return web.FileResponse(f'static/{filename}')
+    return web.FileResponse(f'frontend/dist/{component}/{filename}')
 
 
 @routes.get('/preview/{source:[a-z0-9-]+}')
