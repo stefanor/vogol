@@ -7,7 +7,7 @@ from oauthlib.common import generate_token
 
 
 log = logging.getLogger(__name__)
-routes = web.RouteTableDef()
+auth_routes = web.RouteTableDef()
 
 
 def require_login(func):
@@ -51,7 +51,7 @@ async def session_middleware(request, handler):
     return response
 
 
-@routes.get('/login')
+@auth_routes.get('/login')
 async def login(request):
     config = request.app['config']
     redirect_uri = f'{config["server_url"]}/login/complete'
@@ -65,7 +65,7 @@ async def login(request):
     return response
 
 
-@routes.get('/login/complete')
+@auth_routes.get('/login/complete')
 async def login_complete(request):
     config = request.app['config']
     redirect_uri = f'{config["server_url"]}/login/complete'
