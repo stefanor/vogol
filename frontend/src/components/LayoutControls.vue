@@ -1,6 +1,9 @@
 <template>
   <div class="card">
-    <div class="card-header">Layout</div>
+    <div class="card-header">
+      Layout
+      <div class="current-layout badge badge-info">{{ layout_name }}</div>
+    </div>
     <div class="card-body">
       <div v-for="layout in layouts" v-bind:key="layout.id">
         <button
@@ -11,7 +14,6 @@
           {{ layout.name }}
         </button>
       </div>
-      <div>Layout: {{ composite_mode }}</div>
     </div>
   </div>
 </template>
@@ -42,6 +44,12 @@ export default {
   }),
   computed: mapState({
     composite_mode: 'composite_mode',
+    layout_name() {
+      const layout = this.layouts.find(el => el.id == this.composite_mode);
+      if (layout) {
+        return layout.name;
+      }
+    },
   }),
   methods: {
     set_mode(mode) {
@@ -51,3 +59,11 @@ export default {
   },
 };
 </script>
+
+<style>
+div.current-layout {
+  float: right;
+  padding: 0.4em;
+  margin: 0.1em;
+}
+</style>
