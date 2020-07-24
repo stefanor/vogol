@@ -1,5 +1,5 @@
 import logging
-from asyncio import get_running_loop, run_coroutine_threadsafe, sleep
+from asyncio import get_running_loop, sleep
 
 from voctoweb.gst import Gst
 
@@ -7,7 +7,14 @@ from voctoweb.gst import Gst
 log = logging.getLogger(__name__)
 
 
-async def monitor_stream(app, source, port):
+async def preview_task(app, source, port):
+    """Start and monitor a preview pipeline"""
+    while True:
+        await preview_client(app, source, port)
+        await sleep(5)
+
+
+async def preview_client(app, source, port):
     """Start a pipeline to generate preview images from source, every second"""
     host = app['config']['host']
     log.info('Attempting to start preview pipeline for %s polling %s:%s',
@@ -31,25 +38,23 @@ async def monitor_stream(app, source, port):
     sink = pipeline.get_by_name('sink')
     sink.connect('new-sample', new_sample, source, app['previews'])
 
-    loop = get_running_loop()
+    completion = get_running_loop().create_future()
     bus = pipeline.bus
     bus.add_signal_watch()
-    bus.connect('message', gst_message, app, source, port, loop)
+    bus.connect('message', gst_message, completion, source)
 
     pipeline.set_state(Gst.State.PLAYING)
     log.info('Started preview pipeline for %s', source)
     app['gst']['pipelines'][source] = pipeline
 
+    await completion
+    pipeline.set_state(Gst.State.NULL)
 
-async def restart_stream(app, source, port):
-    """Shut down any existing stream, wait a few seconds, and restart it"""
-    pipeline = app['gst']['pipelines'].pop(source, None)
-    if pipeline:
-        pipeline.set_state(Gst.State.NULL)
 
-    await sleep(5)
-
-    await monitor_stream(app, source, port)
+def stream_ended(completion, result):
+    """Report the stream as ended, unless already done"""
+    if not completion.done():
+        completion.set_result(result)
 
 
 # Asyncio thread, above
@@ -57,14 +62,16 @@ async def restart_stream(app, source, port):
 # GLib thread, below
 
 
-def gst_message(bus, message, app, source, port, loop):
+def gst_message(bus, message, completion, source):
     """GLib thread callback: GstBus message
 
-    Restart the pipeline if it has failed / ended
+    Report stream completion, if the message is fatal
     """
-    if message.type in (Gst.MessageType.EOS, Gst.MessageType.ERROR):
-        log.error('Received %s from %s preview pipeline', message.type, source)
-        run_coroutine_threadsafe(restart_stream(app, source, port), loop)
+    type_ = message.type
+    if type_ in (Gst.MessageType.EOS, Gst.MessageType.ERROR):
+        log.error('Received %s from %s preview pipeline', type_, source)
+        loop = completion.get_loop()
+        loop.call_soon_threadsafe(stream_ended, completion, type_)
 
 
 def new_sample(sink, source, previews):

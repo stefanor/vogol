@@ -4,7 +4,7 @@ from asyncio import (
     CancelledError, create_task, get_running_loop, open_connection)
 from collections import defaultdict
 
-from voctoweb.previews import monitor_stream
+from voctoweb.previews import preview_task
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +117,6 @@ class VoctomixControl:
             self.state['stream_status'] = args
 
     async def close(self):
-        self.reader.close()
         self.writer.close()
 
     @property
@@ -126,13 +125,20 @@ class VoctomixControl:
 
 
 async def connect_voctomix(app):
-    """Connect to voctomix, find out what's there, start the preview pollers"""
+    """Connect to voctomix, find out what's there, start the preview clients"""
     config = app['config']
     voctomix = app['voctomix'] = VoctomixControl()
     await voctomix.connect(config['host'])
     ports = [(source, i + 13000) for i, source in enumerate(voctomix.sources)]
     ports.append(('room', 11000))
-    app['preview_pollers'] = {
-        source: create_task(monitor_stream(app, source, port))
+    app['preview_tasks'] = {
+        source: create_task(preview_task(app, source, port))
         for source, port in ports}
     app['previews'] = {}
+
+
+async def disconnect_voctomix(app):
+    """Stop any running preview tasks"""
+    for task in app['preview_tasks'].values():
+        task.cancel()
+    await app['voctomix'].close()
