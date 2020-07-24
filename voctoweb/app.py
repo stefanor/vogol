@@ -1,9 +1,9 @@
 from aiohttp import web
 
 from voctoweb.auth import auth_middleware, auth_routes, session_middleware
+from voctoweb.gst import start_glib, stop_glib, stop_gst_pipelines
 from voctoweb.routes import routes
 from voctoweb.voctomix import connect_voctomix
-from voctoweb.previews import start_glib, stop_glib, stop_gst_pipelines
 
 
 async def app_factory(config):

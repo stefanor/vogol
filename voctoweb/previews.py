@@ -1,34 +1,10 @@
 import logging
 from asyncio import get_running_loop, run_coroutine_threadsafe, sleep
-from threading import Thread
 
-import gi
-gi.require_version("Gst", "1.0")
-from gi.repository import GLib, Gst
-Gst.init(None)
+from voctoweb.gst import Gst
 
 
 log = logging.getLogger(__name__)
-
-
-async def start_glib(app):
-    """Start a GLib main thread"""
-    app['glib_mainloop'] = loop = GLib.MainLoop()
-    app['gst_pipelines'] = {}
-    thread = Thread(target=loop.run)
-    thread.start()
-
-
-async def stop_glib(app):
-    """Shut down the GLib main thread"""
-    app['glib_mainloop'].quit()
-
-
-async def stop_gst_pipelines(app):
-    """Gracefully shut down any running preview pipelines"""
-    for pipeline in app['gst_pipelines'].values():
-        pipeline.set_state(Gst.State.NULL)
-    app['gst_pipelines'] = {}
 
 
 async def monitor_stream(app, source, port):
@@ -62,12 +38,12 @@ async def monitor_stream(app, source, port):
 
     pipeline.set_state(Gst.State.PLAYING)
     log.info('Started preview pipeline for %s', source)
-    app['gst_pipelines'][source] = pipeline
+    app['gst']['pipelines'][source] = pipeline
 
 
 async def restart_stream(app, source, port):
     """Shut down any existing stream, wait a few seconds, and restart it"""
-    pipeline = app['gst_pipelines'].pop(source, None)
+    pipeline = app['gst']['pipelines'].pop(source, None)
     if pipeline:
         pipeline.set_state(Gst.State.NULL)
 
