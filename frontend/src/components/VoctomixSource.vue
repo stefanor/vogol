@@ -1,32 +1,36 @@
 <template>
   <div class="card">
-    <div class="card-header">
-      {{ title }}
-      <div class="selected-source badge badge-warning" v-if="source_a">A</div>
-      <div class="selected-source badge badge-info" v-if="source_b">B</div>
+    <div class="card-header source-header">
+      <div class="source-name">
+        {{ title }}
+      </div>
+      <div>
+        <button
+          class="btn source"
+          v-bind:class="{'source-a': source_a, 'btn-light': !source_a}"
+          v-bind:disabled="source_a"
+          v-on:click="send('set_a')"
+        >
+          A
+        </button>
+        <button
+          class="btn source"
+          v-bind:class="{'source-b': source_b, 'btn-light': !source_b}"
+          v-bind:disabled="source_b"
+          v-on:click="send('set_b')"
+        >
+          B
+        </button>
+      </div>
     </div>
     <div class="card-body">
       <VideoPreview v-bind:room="source" />
       <button
-        class="btn btn-primary"
+        class="btn source-a"
         v-bind:disabled="is_fullscreen"
         v-on:click="send('fullscreen')"
       >
         Fullscreen
-      </button>
-      <button
-        class="btn btn-warning"
-        v-bind:disabled="source_a"
-        v-on:click="send('set_a')"
-      >
-        A
-      </button>
-      <button
-        class="btn btn-info"
-        v-bind:disabled="source_b"
-        v-on:click="send('set_b')"
-      >
-        B
       </button>
       <br />
       <AudioControl v-bind:source="source" />
@@ -71,9 +75,18 @@ export default {
 </script>
 
 <style>
-div.selected-source {
-  float: right;
-  padding: 0.4em;
-  margin: 0.1em;
+.source-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.source-a {
+  background: #2222ff;
+  color: white;
+}
+.source-b {
+  background: #ff2222;
+  color: white;
 }
 </style>
