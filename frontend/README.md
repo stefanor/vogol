@@ -35,6 +35,5 @@ To build, run `npm run build`. It will build into the `dist` directory.
 
 ### Lints and fixes files
 
-```
-npm run lint
-```
+To run Vue's standard linter, run `npm run lint`.
+To run prettier's automatic tidy, run `npm run tidy`.
