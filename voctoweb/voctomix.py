@@ -4,7 +4,7 @@ from asyncio import (
     CancelledError, create_task, get_running_loop, open_connection)
 from collections import defaultdict
 
-from voctoweb.previews import poll_previews
+from voctoweb.previews import monitor_stream
 
 log = logging.getLogger(__name__)
 
@@ -133,6 +133,6 @@ async def connect_voctomix(app):
     ports = [(source, i + 13000) for i, source in enumerate(voctomix.sources)]
     ports.append(('room', 11000))
     app['preview_pollers'] = {
-        source: create_task(poll_previews(app, source, port))
+        source: create_task(monitor_stream(app, source, port))
         for source, port in ports}
     app['previews'] = {}

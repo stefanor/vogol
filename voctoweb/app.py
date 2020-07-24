@@ -3,7 +3,7 @@ from aiohttp import web
 from voctoweb.auth import auth_middleware, auth_routes, session_middleware
 from voctoweb.routes import routes
 from voctoweb.voctomix import connect_voctomix
-from voctoweb.previews import stop_polling_previews
+from voctoweb.previews import start_glib, stop_glib, stop_gst_pipelines
 
 
 async def app_factory(config):
@@ -15,6 +15,8 @@ async def app_factory(config):
     app.add_routes(auth_routes)
     app['sessions'] = {}
     app['config'] = config
+    app.on_startup.append(start_glib)
     app.on_startup.append(connect_voctomix)
-    app.on_cleanup.append(stop_polling_previews)
+    app.on_cleanup.append(stop_gst_pipelines)
+    app.on_cleanup.append(stop_glib)
     return app
