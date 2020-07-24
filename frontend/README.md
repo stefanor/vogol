@@ -20,7 +20,11 @@ It will monitor changes to the source files, re-build, and re-load the
 app in your browser.
 
 By default, it will proxy requests for the backend URLs to
-`http://127.0.0.1:8080/`, you can customize this in `vue.config.js`.
+`http://127.0.0.1:8080/` (a local dev instance),
+you can change this by exporting
+`BACKEND=https://voctoweb.example.com/`, or customize proxying in
+`vue.config.js`.
+
 See the [Vue CLI Configuration Reference][vue-cli-config]
 
 Vue has an optional [browser plugins][vue-devtools] to inspect Vue
