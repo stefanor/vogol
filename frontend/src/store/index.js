@@ -10,6 +10,7 @@ const state = () => ({
   // From Backend
   audio: [],
   composite_mode: null,
+  connected: false,
   stream_status: null,
   sources: [],
   video_a: null,

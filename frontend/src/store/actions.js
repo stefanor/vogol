@@ -1,15 +1,22 @@
-// Check a Fetch response for sanity
-var check_response = function(context, response) {
+// Check a state response for sanity
+// Restart polling if necessary
+// Return JSON
+var check_response = function({commit, dispatch, state}, response) {
   if (response.status == 403) {
-    context.dispatch('logout');
+    dispatch('logout');
   }
   if (!response.ok) {
-    context.commit(
+    commit(
       'error',
       'Failed to retrieve ' + response.url + ' got ' + response.status
     );
   }
-  return response;
+  const json = response.json();
+  if (json.sources != state.sources) {
+    dispatch('stop_polling');
+    dispatch('start_polling');
+  }
+  return json;
 };
 
 export default {
@@ -33,7 +40,6 @@ export default {
       body: JSON.stringify(action),
     })
       .then(response => check_response(context, response))
-      .then(response => response.json())
       .then(response => commit('received_state', response))
       .catch(error => {
         commit('error', 'Failed to perform action. Got ' + error);
@@ -98,7 +104,6 @@ export default {
         method: 'GET',
       })
         .then(response => check_response(context, response))
-        .then(response => response.json())
         .then(response => commit('received_state', response))
         .then(() => resolve());
     });

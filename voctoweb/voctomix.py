@@ -1,53 +1,184 @@
 import logging
 import json
 from asyncio import (
-    CancelledError, create_task, get_running_loop, open_connection)
+    CancelledError, create_task, get_running_loop, sleep, open_connection,
+    wait_for)
 from collections import defaultdict
 
-from voctoweb.previews import preview_task
+from voctoweb.previews import preview_pipeline, stop_pipeline
 
 log = logging.getLogger(__name__)
 
 
+class Voctomix:
+    def __init__(self, host, gst_pipelines):
+        self.host = host
+        self.control = VoctomixControl(host)
+        self.previews = {}
+        self.preview_tasks = {}
+        self.reconnection_task = None
+        self.gst_pipelines = gst_pipelines
+
+    async def connect(self, reconnect_on_error=False):
+        """Connect to control, and optionally reconnect forever"""
+        if reconnect_on_error:
+            self.reconnection_task = create_task(self.maintain_connection())
+        else:
+            await self._connect()
+
+    async def maintain_connection(self, timeout=5):
+        while True:
+            try:
+                await wait_for(self._connect(), timeout)
+                await self.control.disconnection
+            except Exception as e:
+                log.error("Failed to connect: %s", e)
+            await sleep(5)
+            await self._disconnect()
+
+    async def _connect(self):
+        await self.control.connect()
+        await self.connect_previews()
+
+    async def disconnect(self):
+        """Disconnect and stop any reconnection attempts"""
+        if self.reconnection_task and not self.reconnection_task.done():
+            self.reconnection_task.cancel()
+        await self._disconnect()
+
+    async def _disconnect(self):
+        for pipeline in self.gst_pipelines.values():
+            stop_pipeline(pipeline)
+        # Give Gstreamer a chance to wind down the pipeline
+        await sleep(0.1)
+        for task in self.preview_tasks.values():
+            task.cancel()
+        await self.control.disconnect()
+
+    async def connect_previews(self):
+        """Start tasks to generate previews from all the mirror ports"""
+        sources = self.state['sources']
+        ports = [(source, i + 13000) for i, source in enumerate(sources)]
+        ports.append(('room', 11000))
+        for source, port in ports:
+            self.preview_tasks[source] = create_task(
+                self.preview_task(source, port))
+
+    async def preview_task(self, source, port):
+        """Start and monitor a preview pipeline"""
+        while True:
+            await preview_pipeline(self.host, port, source, self.previews,
+                                   self.gst_pipelines)
+            await sleep(5)
+
+    @property
+    def state(self):
+        return self.control.state
+
+    async def action(self, action, source=None, mode=None):
+        """Fire an action requested by the client"""
+        send = self.control.send
+        if action == 'fullscreen':
+            await send('set_composite_mode', 'fullscreen')
+            await send('set_video_a', source)
+        elif action == 'set_composite_mode':
+            await send('set_composite_mode', mode)
+        elif action =='set_a':
+            await send('set_video_a', source)
+        elif action =='set_b':
+            await send('set_video_b', source)
+        elif action == 'stream_live':
+            await send('set_stream_live')
+        elif action == 'stream_blank':
+            await send('set_stream_blank', 'nostream')
+        elif action == 'stream_loop':
+            await send('set_stream_blank', 'loop')
+        elif action == 'mute':
+            await send('set_audio_volume', source, '0')
+        elif action == 'unmute':
+            await send('set_audio_volume', source, '1')
+        elif action == 'cut':
+            await send('message', 'cut')
+        else:
+            raise Exception(f'Unknown action: {action}')
+
+
 class VoctomixControl:
-    async def connect(self, host):
-        log.info('Connecting to voctomix control')
-        self.reader, self.writer = await open_connection(host, 9999)
+    def __init__(self, host):
+        self.host = host
+        # A Future that is pending as long as we're connected:
+        self.disconnection = None
         self.loop = get_running_loop()
+        # Our view of Voctocore's state:
         self.state = {}
+        self.reader_task = None
+        # Responses that we're .expect()ing from the core:
         self.response_futures = defaultdict(list)
-        create_task(self.reader_task())
+
+    async def connect(self):
+        """Initialize state, and connect to voctocore"""
+        log.info('Connecting to voctomix control')
+        self._reader, self._writer = await open_connection(self.host, 9999)
+        log.debug('Connected')
+        self.disconnection = self.loop.create_future()
+        self.state.clear()
+        self.reader_task = create_task(self.reader())
+
         # Initialize our state
         await self.send('get_config')
         await self.send('get_audio')
         await self.send('get_stream_status')
         await self.send('get_composite_mode_and_video_status')
+        self.state['connected'] = True
 
-    async def reader_task(self):
+    async def disconnect(self, reason=None):
+        """Disconnect from voctocore"""
+        if not self.disconnection or self.disconnection.done():
+            return
+        log.warn('Disconnecting from voctomix control for %s', reason)
+        self.state['connected'] = False
+        for futures in self.response_futures.values():
+            for future in futures:
+                if not future.done():
+                    future.cancel()
+        self.response_futures.clear()
+        if self.reader_task and not self.reader_task.done():
+            self.reader_task.cancel()
+        if not self._writer.is_closing():
+            self._writer.close()
+        self.disconnection.set_result(reason)
+
+    async def reader(self):
         """Follow events from the core
 
         They can arrive at any time.
         If anyone is waiting for one of them, notify them.
         """
-        while True:
+        while not self._reader.at_eof():
             try:
-                line = await self.reader.readline()
-            except CancelledError:
+                line = await self._reader.readline()
+            except (ConnectionResetError, CancelledError) as e:
+                await self.disconnect(e)
                 return
             line = line.decode('utf-8').strip()
-            cmd, args = line.split(None, 1)
+            try:
+                cmd, args = line.split(None, 1)
+            except ValueError:
+                continue
             self.update_state(cmd, args)
             futures = self.response_futures[cmd]
             while futures:
                 future = futures.pop(0)
                 future.set_result(args)
 
+        await self.disconnect(EOFError)
+
     async def send(self, *command):
         """Send a command to voctomix"""
         cmd = ' '.join(command)
-        self.writer.write(cmd.encode('utf-8'))
-        self.writer.write(b'\n')
-        await self.writer.drain()
+        self._writer.write(cmd.encode('utf-8'))
+        self._writer.write(b'\n')
+        await self._writer.drain()
         last_responses = {
             'get_audio': 'audio_status',
             'get_config': 'server_config',
@@ -71,32 +202,6 @@ class VoctomixControl:
         self.response_futures[command].append(future)
         return await future
 
-    async def action(self, action, source=None, mode=None):
-        """Fire an action requested by the client"""
-        if action == 'fullscreen':
-            await self.send('set_composite_mode', 'fullscreen')
-            await self.send('set_video_a', source)
-        elif action == 'set_composite_mode':
-            await self.send('set_composite_mode', mode)
-        elif action =='set_a':
-            await self.send('set_video_a', source)
-        elif action =='set_b':
-            await self.send('set_video_b', source)
-        elif action == 'stream_live':
-            await self.send('set_stream_live')
-        elif action == 'stream_blank':
-            await self.send('set_stream_blank', 'nostream')
-        elif action == 'stream_loop':
-            await self.send('set_stream_blank', 'loop')
-        elif action == 'mute':
-            await self.send('set_audio_volume', source, '0')
-        elif action == 'unmute':
-            await self.send('set_audio_volume', source, '1')
-        elif action == 'cut':
-            await self.send('message', 'cut')
-        else:
-            raise Exception(f'Unknown action: {action}')
-
     def update_state(self, cmd, args):
         """Update our view of Voctomix's state, based on a received message"""
         if cmd == 'server_config':
@@ -116,29 +221,15 @@ class VoctomixControl:
         elif cmd == 'stream_status':
             self.state['stream_status'] = args
 
-    async def close(self):
-        self.writer.close()
-
-    @property
-    def sources(self):
-        return self.state['sources']
-
 
 async def connect_voctomix(app):
     """Connect to voctomix, find out what's there, start the preview clients"""
     config = app['config']
-    voctomix = app['voctomix'] = VoctomixControl()
-    await voctomix.connect(config['host'])
-    ports = [(source, i + 13000) for i, source in enumerate(voctomix.sources)]
-    ports.append(('room', 11000))
-    app['preview_tasks'] = {
-        source: create_task(preview_task(app, source, port))
-        for source, port in ports}
-    app['previews'] = {}
+    voctomix = Voctomix(config['host'], app['gst']['pipelines'])
+    await voctomix.connect(reconnect_on_error=True)
+    app['voctomix'] = voctomix
 
 
 async def disconnect_voctomix(app):
     """Stop any running preview tasks"""
-    for task in app['preview_tasks'].values():
-        task.cancel()
-    await app['voctomix'].close()
+    await app['voctomix'].disconnect()

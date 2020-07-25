@@ -1,6 +1,9 @@
 <template>
   <div id="app" class="content">
     <h1>VoctoWeb</h1>
+    <b-alert variant="danger" v-model="disconnected">
+      <strong>Disconnected from core</strong>
+    </b-alert>
     <b-alert variant="danger" v-model="has_error">
       <strong>Error:</strong> {{ error }}
     </b-alert>
@@ -62,6 +65,7 @@ export default {
   },
   computed: mapState({
     error: 'error',
+    disconnected: state => !state.connected,
     has_error: state => !!state.error,
     last_update: 'last_update',
     logged_out: state => !state.logged_in,

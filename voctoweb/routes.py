@@ -33,7 +33,8 @@ async def static(request):
 @require_login
 async def preview_image(request):
     source = request.match_info['source']
-    preview = request.app['previews'].get(source)
+    voctomix = request.app['voctomix']
+    preview = voctomix.previews.get(source)
     if not preview:
         raise web.HTTPNotFound()
     return web.Response(

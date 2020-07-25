@@ -1,5 +1,5 @@
 import logging
-from asyncio import get_running_loop, sleep
+from asyncio import get_running_loop
 
 from voctoweb.gst import Gst
 
@@ -7,16 +7,8 @@ from voctoweb.gst import Gst
 log = logging.getLogger(__name__)
 
 
-async def preview_task(app, source, port):
-    """Start and monitor a preview pipeline"""
-    while True:
-        await preview_client(app, source, port)
-        await sleep(5)
-
-
-async def preview_client(app, source, port):
+async def preview_pipeline(host, port, source, previews, gst_pipelines):
     """Start a pipeline to generate preview images from source, every second"""
-    host = app['config']['host']
     log.info('Attempting to start preview pipeline for %s polling %s:%s',
              source, host, port)
 
@@ -36,7 +28,7 @@ async def preview_client(app, source, port):
     src.set_property('port', port)
 
     sink = pipeline.get_by_name('sink')
-    sink.connect('new-sample', new_sample, source, app['previews'])
+    sink.connect('new-sample', new_sample, source, previews)
 
     completion = get_running_loop().create_future()
     bus = pipeline.bus
@@ -45,9 +37,14 @@ async def preview_client(app, source, port):
 
     pipeline.set_state(Gst.State.PLAYING)
     log.info('Started preview pipeline for %s', source)
-    app['gst']['pipelines'][source] = pipeline
+    gst_pipelines[source] = pipeline
 
     await completion
+    pipeline.set_state(Gst.State.NULL)
+
+
+def stop_pipeline(pipeline):
+    """Stop a pipeline"""
     pipeline.set_state(Gst.State.NULL)
 
 
