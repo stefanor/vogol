@@ -53,16 +53,16 @@ export default {
   },
   computed: mapState({
     is_fullscreen(state) {
-      return state.composite_mode == 'fullscreen' && this.source_a;
+      return state.voctomix.composite_mode == 'fullscreen' && this.source_a;
     },
     title() {
       return startCase(this.source);
     },
     source_a(state) {
-      return state.video_a == this.source;
+      return state.voctomix.video_a == this.source;
     },
     source_b(state) {
-      return state.video_b == this.source;
+      return state.voctomix.video_b == this.source;
     },
   }),
   methods: {

@@ -42,7 +42,7 @@ import {mapState} from 'vuex';
 
 export default {
   computed: mapState({
-    stream_status: 'stream_status',
+    stream_status: state => state.voctomix.stream_status,
     live() {
       return this.stream_status == 'live';
     },

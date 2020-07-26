@@ -19,13 +19,13 @@ export default {
       return this.room != 'room';
     },
     preview(state) {
-      const preview = state.previews[this.room];
+      const preview = state.previews.previews[this.room];
       if (preview) {
         return URL.createObjectURL(preview);
       }
     },
     isStale(state) {
-      return !state.preview_is_current[this.room];
+      return !state.previews.preview_is_current[this.room];
     },
   }),
 };

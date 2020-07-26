@@ -43,7 +43,7 @@ export default {
     ],
   }),
   computed: mapState({
-    composite_mode: 'composite_mode',
+    composite_mode: state => state.voctomix.composite_mode,
     layout_name() {
       const layout = this.layouts.find(el => el.id == this.composite_mode);
       if (layout) {

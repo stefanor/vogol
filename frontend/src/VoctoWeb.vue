@@ -64,12 +64,12 @@ export default {
     VoctomixSource,
   },
   computed: mapState({
-    error: 'error',
-    disconnected: state => !state.connected,
-    has_error: state => !!state.error,
-    last_update: 'last_update',
-    logged_out: state => !state.logged_in,
-    sources: 'sources',
+    error: state => state.ui.error,
+    disconnected: state => !state.voctomix.connected,
+    has_error: state => !!state.ui.error,
+    last_update: state => state.voctomix.last_update,
+    logged_out: state => !state.ui.logged_in,
+    sources: state => state.voctomix.sources,
   }),
   methods: {
     loginButton(event) {

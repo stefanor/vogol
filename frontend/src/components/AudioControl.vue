@@ -42,7 +42,7 @@ export default {
       return this.volume < 20;
     },
     volume(state) {
-      const volume_fraction = state.audio[this.source];
+      const volume_fraction = state.voctomix.audio[this.source];
       const volume_percent = Math.trunc(volume_fraction * 100);
       return volume_percent;
     },
