@@ -1,7 +1,7 @@
 import logging
 from asyncio import get_running_loop
 
-from voctoweb.gst import Gst
+from voctoweb.gst import Gst, stop_pipeline
 
 
 log = logging.getLogger(__name__)
@@ -40,12 +40,7 @@ async def preview_pipeline(host, port, source, previews, gst_pipelines):
     gst_pipelines[source] = pipeline
 
     await completion
-    pipeline.set_state(Gst.State.NULL)
-
-
-def stop_pipeline(pipeline):
-    """Stop a pipeline"""
-    pipeline.set_state(Gst.State.NULL)
+    await stop_pipeline(pipeline)
 
 
 def stream_ended(completion, result):

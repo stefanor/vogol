@@ -5,7 +5,8 @@ from asyncio import (
     wait_for)
 from collections import defaultdict
 
-from voctoweb.previews import preview_pipeline, stop_pipeline
+from voctoweb.gst import stop_pipelines
+from voctoweb.previews import preview_pipeline
 
 log = logging.getLogger(__name__)
 
@@ -47,10 +48,7 @@ class Voctomix:
         await self._disconnect()
 
     async def _disconnect(self):
-        for pipeline in self.gst_pipelines.values():
-            stop_pipeline(pipeline)
-        # Give Gstreamer a chance to wind down the pipeline
-        await sleep(0.1)
+        await stop_pipelines(self.gst_pipelines.values())
         for task in self.preview_tasks.values():
             task.cancel()
         await self.control.disconnect()
