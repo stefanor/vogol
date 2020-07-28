@@ -41,6 +41,7 @@ async def preview_pipeline(host, port, source, previews, gst_pipelines):
     gst_pipelines[source] = pipeline
 
     await completion
+    previews[source] = None
     await stop_pipeline(pipeline)
 
 
