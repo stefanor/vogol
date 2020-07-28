@@ -13,6 +13,7 @@ routes = web.RouteTableDef()
 def get_state(app):
     """Current state dict for the client"""
     return {
+        'playback': app['player'].state,
         'voctomix': app['voctomix'].state,
     }
 
@@ -55,12 +56,18 @@ async def preview_image(request):
 @require_login
 async def action(request):
     data = await request.json()
+    player = request.app['player']
     voctomix = request.app['voctomix']
     username = request['session'].get('username', 'anon')
     log.info('Action by %s: %r', username, data)
 
-    if 'voctomix' in data:
-        await wait_for(voctomix.action(**data['voctomix']), timeout=1)
+    try:
+        if 'voctomix' in data:
+            await wait_for(voctomix.action(**data['voctomix']), timeout=1)
+        if 'playback' in data:
+            await wait_for(player.action(**data['playback']), timeout=2)
+    except TimeoutError:
+        pass
 
     return web.json_response(get_state(request.app))
 
@@ -70,3 +77,13 @@ async def action(request):
 async def state(request):
     return web.json_response(
         get_state(request.app), headers={hdrs.CACHE_CONTROL: 'no-cache'})
+
+
+@routes.get('/playback/files')
+@require_login
+async def available_files(request):
+    player = request.app['player']
+    files = player.list_files()
+    return web.json_response(
+        files,
+        headers={hdrs.CACHE_CONTROL: 'no-cache'})

@@ -73,6 +73,17 @@ class Voctomix:
     def state(self):
         return self.control.state
 
+    def source_port(self, source):
+        return 10000 + self.state['sources'].index(source)
+
+    @property
+    def mix_audiocaps(self):
+        return self.control.config['mix']['audiocaps']
+
+    @property
+    def mix_videocaps(self):
+        return self.control.config['mix']['videocaps']
+
     async def action(self, action, source=None, mode=None):
         """Fire an action requested by the client"""
         send = self.control.send

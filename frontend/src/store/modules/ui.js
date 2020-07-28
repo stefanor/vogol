@@ -1,3 +1,5 @@
+import {check_response} from '../lib/helpers';
+
 const state = () => ({
   error: null,
   logged_in: true,
@@ -27,27 +29,13 @@ const mutations = {
 
   state_updated(state) {
     state.state_last_updated = new Date();
-  }
+  },
 };
-
-// Check a state response for sanity
-var check_response = function({commit, dispatch}, response) {
-  if (response.status == 403) {
-    dispatch('logout');
-  }
-  if (!response.ok) {
-    commit(
-      'error',
-      'Failed to retrieve ' + response.url + ' got ' + response.status
-    );
-  }
-  return response;
-};
-
 
 const actions = {
   connect({dispatch}) {
     dispatch('update_state').then(() => dispatch('start_polling'));
+    dispatch('refresh_files');
   },
 
   logout({commit, dispatch}) {
@@ -90,6 +78,7 @@ const actions = {
         .then(response => response.json())
         .then(response => {
           dispatch('voctomix_received_state', response.voctomix);
+          dispatch('playback_received_state', response.playback);
           commit('state_updated');
           return response;
         })
@@ -111,6 +100,7 @@ const actions = {
       .then(response => response.json())
       .then(response => {
         dispatch('voctomix_received_state', response.voctomix);
+        dispatch('playback_received_state', response.playback);
         commit('state_updated');
         return response;
       })

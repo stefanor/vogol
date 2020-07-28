@@ -11,6 +11,7 @@
       <RoomPreview />
       <StreamControls />
       <LayoutControls />
+      <PlaybackControls />
     </div>
     <div class="row">
       <VoctomixSource
@@ -50,6 +51,7 @@ import {mapState} from 'vuex';
 import RoomPreview from './components/RoomPreview.vue';
 import StreamControls from './components/StreamControls.vue';
 import LayoutControls from './components/LayoutControls.vue';
+import PlaybackControls from './components/PlaybackControls.vue';
 import VoctomixSource from './components/VoctomixSource.vue';
 
 Vue.use(AlertPlugin);
@@ -59,6 +61,7 @@ export default {
   name: 'VoctoWeb',
   components: {
     LayoutControls,
+    PlaybackControls,
     RoomPreview,
     StreamControls,
     VoctomixSource,
