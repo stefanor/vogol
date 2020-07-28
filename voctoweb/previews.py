@@ -19,6 +19,7 @@ async def preview_pipeline(host, port, source, previews, gst_pipelines):
     ! videorate max-rate=1
     ! videoscale
     ! video/x-raw, width=320, height=180
+    ! watchdog timeout=5000
     ! jpegenc
     ! appsink name=sink emit-signals=true drop=true max-buffers=1
     """)
