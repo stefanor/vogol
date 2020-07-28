@@ -50,7 +50,7 @@ export default {
   methods: {
     send(action) {
       const source = this.source;
-      this.$store.dispatch('send_action', {action, source});
+      this.$store.dispatch('voctomix_action', {action, source});
     },
   },
 };

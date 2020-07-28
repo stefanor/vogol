@@ -10,6 +10,13 @@ log = logging.getLogger(__name__)
 routes = web.RouteTableDef()
 
 
+def get_state(app):
+    """Current state dict for the client"""
+    return {
+        'voctomix': app['voctomix'].state,
+    }
+
+
 @routes.get('/')
 async def root(request):
     return web.FileResponse('frontend/dist/index.html', headers={
@@ -52,15 +59,14 @@ async def action(request):
     username = request['session'].get('username', 'anon')
     log.info('Action by %s: %r', username, data)
 
-    await wait_for(voctomix.action(**data), timeout=1)
-    return web.json_response(voctomix.state)
+    if 'voctomix' in data:
+        await wait_for(voctomix.action(**data['voctomix']), timeout=1)
+
+    return web.json_response(get_state(request.app))
 
 
 @routes.get('/state')
 @require_login
 async def state(request):
-    voctomix = request.app['voctomix']
     return web.json_response(
-        voctomix.state,
-        headers={hdrs.CACHE_CONTROL: 'no-cache'},
-    )
+        get_state(request.app), headers={hdrs.CACHE_CONTROL: 'no-cache'})

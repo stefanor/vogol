@@ -67,7 +67,7 @@ export default {
     error: state => state.ui.error,
     disconnected: state => !state.voctomix.connected,
     has_error: state => !!state.ui.error,
-    last_update: state => state.voctomix.last_update,
+    last_update: state => state.ui.state_last_updated,
     logged_out: state => !state.ui.logged_in,
     sources: state => state.voctomix.sources,
   }),

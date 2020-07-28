@@ -4,6 +4,7 @@ const state = () => ({
   pollers: [],
   preview_update_interval: 2000,
   state_update_interval: 5000,
+  state_last_updated: null,
 });
 
 const mutations = {
@@ -23,7 +24,26 @@ const mutations = {
   logout(state) {
     state.logged_in = false;
   },
+
+  state_updated(state) {
+    state.state_last_updated = new Date();
+  }
 };
+
+// Check a state response for sanity
+var check_response = function({commit, dispatch}, response) {
+  if (response.status == 403) {
+    dispatch('logout');
+  }
+  if (!response.ok) {
+    commit(
+      'error',
+      'Failed to retrieve ' + response.url + ' got ' + response.status
+    );
+  }
+  return response;
+};
+
 
 const actions = {
   connect({dispatch}) {
@@ -57,6 +77,46 @@ const actions = {
       clearInterval(poller);
     }
     commit('clear_pollers');
+  },
+
+  update_state(context) {
+    return new Promise(resolve => {
+      const {commit, dispatch} = context;
+      fetch('/state', {
+        credentials: 'same-origin',
+        method: 'GET',
+      })
+        .then(response => check_response(context, response))
+        .then(response => response.json())
+        .then(response => {
+          dispatch('voctomix_received_state', response.voctomix);
+          commit('state_updated');
+          return response;
+        })
+        .then(() => resolve());
+    });
+  },
+
+  send_action(context, action) {
+    const {commit, dispatch} = context;
+    fetch('/action', {
+      credentials: 'same-origin',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(action),
+    })
+      .then(response => check_response(context, response))
+      .then(response => response.json())
+      .then(response => {
+        dispatch('voctomix_received_state', response.voctomix);
+        commit('state_updated');
+        return response;
+      })
+      .catch(error => {
+        commit('error', 'Failed to perform action. Got ' + error);
+      });
   },
 };
 

@@ -54,7 +54,7 @@ export default {
   methods: {
     set_mode(mode) {
       const action = 'set_composite_mode';
-      this.$store.dispatch('send_action', {action, mode});
+      this.$store.dispatch('voctomix_action', {action, mode});
     },
   },
 };
