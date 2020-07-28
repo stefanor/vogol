@@ -6,7 +6,7 @@
       <b-icon-stop-fill scale="1.5" v-if="stopped" />
     </div>
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">
+      <li class="list-group-item" v-if="stopped">
         <button class="btn btn-primary" v-b-modal.playback-file-modal>
           Select File
         </button>
