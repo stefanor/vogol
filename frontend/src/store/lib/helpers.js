@@ -2,6 +2,7 @@
 export var check_response = function({commit, dispatch}, response) {
   if (response.status == 403) {
     dispatch('logout');
+    throw new Error('logged out');
   }
   if (!response.ok) {
     commit(
