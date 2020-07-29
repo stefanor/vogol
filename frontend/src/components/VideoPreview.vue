@@ -11,6 +11,9 @@ import {mapState} from 'vuex';
 
 export default {
   props: ['room'],
+  data: () => ({
+    last_object_url: null,
+  }),
   computed: mapState({
     isRoom() {
       return this.room == 'room';
@@ -21,7 +24,12 @@ export default {
     preview(state) {
       const preview = state.previews.previews[this.room];
       if (preview) {
-        return URL.createObjectURL(preview);
+        if (this.last_object_url) {
+          URL.revokeObjectURL(this.last_object_url);
+        }
+        const url = URL.createObjectURL(preview);
+        this.last_object_url = url;
+        return url;
       }
     },
     isStale(state) {
