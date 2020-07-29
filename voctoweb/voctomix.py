@@ -32,6 +32,8 @@ class Voctomix:
             try:
                 await wait_for(self._connect(), timeout)
                 await self.control.disconnection
+            except CancelledError:
+                return
             except Exception as e:
                 log.error("Failed to connect: %s", e)
             await sleep(5)
