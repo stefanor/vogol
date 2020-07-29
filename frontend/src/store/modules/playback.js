@@ -20,7 +20,15 @@ const mutations = {
 
 const actions = {
   playback_action({dispatch}, action) {
-    dispatch('send_action', {playback: action});
+    var actions = {playback: action};
+    if (action.action == 'play') {
+      actions.voctomix = {
+        action: 'fullscreen',
+        source: 'recording',
+      };
+    }
+
+    dispatch('send_action', actions);
   },
 
   playback_received_state({commit}, updated_state) {
