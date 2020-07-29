@@ -65,7 +65,7 @@ async def action(request):
         if 'voctomix' in data:
             await wait_for(voctomix.action(**data['voctomix']), timeout=1)
         if 'playback' in data:
-            await wait_for(player.action(**data['playback']), timeout=2)
+            await wait_for(player.action(**data['playback']), timeout=10)
     except TimeoutError:
         pass
 

@@ -3,9 +3,11 @@ from asyncio import gather, sleep, wait_for
 from threading import Thread
 
 import gi
-gi.require_version("Gst", "1.0")
-from gi.repository import GLib, Gst
+gi.require_version('Gst', '1.0')
+gi.require_version('GstPbutils', '1.0')
+from gi.repository import GLib, Gst, GstPbutils
 Gst.init(None)
+GstPbutils.pb_utils_init()
 
 
 log = logging.getLogger(__name__)

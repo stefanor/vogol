@@ -2,7 +2,7 @@ import logging
 from asyncio import create_task, get_running_loop, sleep
 from pathlib import Path
 
-from voctoweb.gst import Gst, stop_pipeline
+from voctoweb.gst import Gst, GstPbutils, stop_pipeline
 
 
 log = logging.getLogger(__name__)
@@ -120,27 +120,17 @@ async def stop_player(app):
 
 
 async def file_duration(path):
-    """Run path through a Gst pipeline to determine the duration"""
-    pipeline_str = """
-    filesrc name=src
-    ! decodebin
-    ! fakesink
-    """
-    pipeline = Gst.parse_launch(pipeline_str)
+    """Determine a file's duration"""
+    discoverer = GstPbutils.Discoverer.new(2 * Gst.SECOND)
+    discoverer.start()
 
     loop = get_running_loop()
-    eos = loop.create_future()
+    duration_future = loop.create_future()
 
-    pipeline.bus.add_signal_watch()
-    pipeline.bus.connect('message::eos', eos_report_duration, pipeline, eos)
-    pipeline.bus.connect('message::error', eos_report_none, eos)
-
-    src = pipeline.get_by_name('src')
-    src.set_property('location', str(path))
-
-    pipeline.set_state(Gst.State.PLAYING)
-    duration = await eos
-    await stop_pipeline(pipeline)
+    discoverer.connect('discovered', file_discovered, duration_future)
+    discoverer.discover_uri_async(path.as_uri())
+    duration = await duration_future
+    discoverer.stop()
     return duration
 
 
@@ -213,11 +203,11 @@ def format_time(nsecs):
 # GLib thread, below
 
 
-def eos_report_duration(bus, message, pipeline, duration_future):
-    """Fires in GStreamer thread, at the EOS"""
-    duration = pipeline.query_duration(Gst.Format.TIME)
+def file_discovered(discoverer, info, error, duration_future):
+    """Parse a DiscovererInfo and resolve the future"""
     loop = duration_future.get_loop()
-    loop.call_soon_threadsafe(set_result, duration_future, duration.duration)
+    duration = info.get_duration()
+    loop.call_soon_threadsafe(set_result, duration_future, duration)
 
 
 def eos_report_none(bus, message, eos_future):
