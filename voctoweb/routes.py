@@ -30,7 +30,7 @@ async def favicon(request):
         hdrs.CONTENT_TYPE: 'image/vnd.microsoft.icon'})
 
 
-@routes.get('/{component:(js|css)}/{filename:[a-z0-9.-]+}')
+@routes.get('/{component:(img|js|css)}/{filename:[a-z0-9.-]+}')
 async def static(request):
     component = request.match_info['component']
     filename = request.match_info['filename']
