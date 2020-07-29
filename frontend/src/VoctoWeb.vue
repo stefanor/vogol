@@ -1,6 +1,11 @@
 <template>
   <div id="app" class="content">
-    <h1>VoctoWeb</h1>
+    <b-navbar toggleable="lg" type="light" v-bind:variant="stream_live ? 'success' : 'danger'">
+      <b-navbar-brand href="#">
+        <img v-bind:src="voctoweb_logo" id="nav-logo">
+        VoctoWeb
+      </b-navbar-brand>
+    </b-navbar>
     <b-alert variant="danger" v-model="disconnected">
       <strong>Disconnected from core</strong>
     </b-alert>
@@ -45,7 +50,7 @@
 
 <script>
 import Vue from 'vue';
-import {AlertPlugin, ModalPlugin} from 'bootstrap-vue';
+import {AlertPlugin, NavbarPlugin, ModalPlugin} from 'bootstrap-vue';
 import {mapState} from 'vuex';
 
 import RoomPreview from './components/RoomPreview.vue';
@@ -53,9 +58,11 @@ import StreamControls from './components/StreamControls.vue';
 import LayoutControls from './components/LayoutControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
 import VoctomixSource from './components/VoctomixSource.vue';
+import favicon_svg from './favicon/favicon.svg';
 
 Vue.use(AlertPlugin);
 Vue.use(ModalPlugin);
+Vue.use(NavbarPlugin);
 
 export default {
   name: 'VoctoWeb',
@@ -66,9 +73,13 @@ export default {
     StreamControls,
     VoctomixSource,
   },
+  data: () => ({
+    voctoweb_logo: favicon_svg,
+  }),
   computed: mapState({
     error: state => state.ui.error,
     disconnected: state => !state.voctomix.connected,
+    stream_live: state => state.voctomix.stream_status == 'live',
     has_error: state => !!state.ui.error,
     last_update: state => state.ui.state_last_updated,
     logged_out: state => !state.ui.logged_in,
@@ -89,3 +100,9 @@ export default {
   },
 };
 </script>
+
+<style>
+#nav-logo {
+  max-height: 1.5em;
+}
+</style>
