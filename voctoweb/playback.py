@@ -156,7 +156,7 @@ def file_play(path, host, port, videocaps, audiocaps):
     demux.
     ! queue
     ! videoconvert
-    ! yadif
+    ! deinterlace
     ! videorate
     ! videoscale
     ! {videocaps}
