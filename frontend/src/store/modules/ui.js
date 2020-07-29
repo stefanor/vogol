@@ -34,8 +34,9 @@ const mutations = {
 
 const actions = {
   connect({dispatch}) {
-    dispatch('update_state').then(() => dispatch('start_polling'));
-    dispatch('refresh_files');
+    dispatch('update_state')
+      .then(() => dispatch('start_polling'))
+      .then(() => dispatch('refresh_files'));
   },
 
   logout({commit, dispatch}) {
@@ -68,7 +69,7 @@ const actions = {
   },
 
   update_state(context) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const {commit, dispatch} = context;
       fetch('/state', {
         credentials: 'same-origin',
@@ -82,7 +83,10 @@ const actions = {
           commit('state_updated');
           return response;
         })
-        .then(() => resolve());
+        .then(() => resolve())
+        .catch(error => {
+          reject(error);
+        });
     });
   },
 
