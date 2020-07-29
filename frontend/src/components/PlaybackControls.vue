@@ -30,6 +30,7 @@
       id="playback-file-modal"
       ok-title="Load for Playback"
       v-on:ok="load_file"
+      v-on:show="refresh_files"
     >
       <div class="modal-body">
         <b-form-radio
@@ -76,6 +77,9 @@ export default {
     },
     play() {
       this.$store.dispatch('playback_action', {action: 'play'});
+    },
+    refresh_files() {
+      this.$store.dispatch('refresh_files');
     },
     stop() {
       this.$store.dispatch('playback_action', {action: 'stop'});
