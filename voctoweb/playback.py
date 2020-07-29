@@ -83,7 +83,7 @@ class VideoPlayer:
     async def stop(self):
         """Stop playback of the current file"""
         self.playback = 'stopped'
-        if self.playback_future and not self.playback_future.done():
+        if self.playback_future:
             self.playback_future.set_result(None)
         if self.playback_pipeline:
             await stop_pipeline(self.playback_pipeline)
@@ -187,7 +187,11 @@ def file_play(path, host, port, videocaps, audiocaps):
 
 def set_result(future, result):
     """Complete a future, with result"""
-    future.set_result(result)
+    if future.done():
+        log.error('Future is already done %r, ignoring result %r',
+                  future, result)
+    else:
+        future.set_result(result)
 
 
 def format_time(nsecs):
