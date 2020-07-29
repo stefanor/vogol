@@ -202,7 +202,7 @@ def set_result(future, result):
 
 def format_time(nsecs):
     """Pretty-print a gst timestamp"""
-    secs = nsecs // 1000000000
+    secs = nsecs // Gst.SECOND
     mins, secs = divmod(secs, 60)
     hours, mins = divmod(mins, 60)
     return f'{hours:02}:{mins:02}:{secs:02}'
