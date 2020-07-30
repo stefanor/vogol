@@ -73,7 +73,7 @@ export default {
   methods: {
     load_file() {
       const file = this.selected_file;
-      this.$store.dispatch('playback_action', {file});
+      this.$store.dispatch('playback_action', {action: 'load', file});
     },
     play() {
       this.$store.dispatch('playback_action', {action: 'play'});

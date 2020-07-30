@@ -12,12 +12,13 @@ log = logging.getLogger(__name__)
 
 
 class Voctomix:
-    def __init__(self, host, gst_pipelines):
+    def __init__(self, host, broadcaster, gst_pipelines):
         self.host = host
-        self.control = VoctomixControl(host)
+        self.control = VoctomixControl(host, self)
         self.previews = {}
         self.preview_tasks = {}
         self.reconnection_task = None
+        self.broadcaster = broadcaster
         self.gst_pipelines = gst_pipelines
 
     async def connect(self, reconnect_on_error=False):
@@ -113,9 +114,12 @@ class Voctomix:
         else:
             raise Exception(f'Unknown action: {action}')
 
+    def state_changed(self, state):
+        self.broadcaster.broadcast({'type': 'voctomix_state', 'state': state})
+
 
 class VoctomixControl:
-    def __init__(self, host):
+    def __init__(self, host, voctomix):
         self.host = host
         # A Future that is pending as long as we're connected:
         self.disconnection = None
@@ -125,6 +129,7 @@ class VoctomixControl:
         self.reader_task = None
         # Responses that we're .expect()ing from the core:
         self.response_futures = defaultdict(list)
+        self.voctomix = voctomix
 
     async def connect(self):
         """Initialize state, and connect to voctocore"""
@@ -181,6 +186,7 @@ class VoctomixControl:
             while futures:
                 future = futures.pop(0)
                 future.set_result(args)
+            self.voctomix.state_changed(self.state)
 
         await self.disconnect(EOFError)
 
@@ -236,7 +242,10 @@ class VoctomixControl:
 async def connect_voctomix(app):
     """Connect to voctomix, find out what's there, start the preview clients"""
     config = app['config']
-    voctomix = Voctomix(config['host'], app['gst']['pipelines'])
+    voctomix = Voctomix(
+        host=config['host'],
+        broadcaster=app['broadcaster'],
+        gst_pipelines=app['gst']['pipelines'])
     await voctomix.connect(reconnect_on_error=True)
     app['voctomix'] = voctomix
 

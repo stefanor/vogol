@@ -1,5 +1,3 @@
-import {check_response} from '../lib/helpers';
-
 const state = () => ({
   duration: self.duration,
   file: null,
@@ -19,37 +17,51 @@ const mutations = {
 };
 
 const actions = {
-  playback_action({dispatch}, action) {
-    var actions = {playback: action};
+  playback_action({dispatch, rootState}, action) {
     if (action.action == 'play') {
-      actions.voctomix = {
-        action: 'fullscreen',
-        source: 'recording',
-      };
+      const voctomix = rootState.voctomix;
+      if (voctomix.sources.indexOf('recording') == -1) {
+        console.log("No recording source, can't control it");
+      } else {
+        if (
+          voctomix.composite_mode != 'fullscreen' ||
+          voctomix.video_a != 'recording'
+        ) {
+          dispatch('send_action', {
+            type: 'voctomix',
+            action: {
+              action: 'fullscreen',
+              source: 'recording',
+            },
+          });
+        }
+        if (rootState.voctomix.audio.recording < 0.2) {
+          dispatch('send_action', {
+            type: 'voctomix',
+            action: {
+              action: 'unmute',
+              source: 'recording',
+            },
+          });
+        }
+      }
     }
-
-    dispatch('send_action', actions);
+    dispatch('send_action', {type: 'player', action});
   },
 
   playback_received_state({commit}, updated_state) {
     commit('playback_state_update', updated_state);
   },
 
-  refresh_files(context) {
-    const {commit} = context;
-    fetch('/playback/files', {
-      credentials: 'same-origin',
-      method: 'GET',
-    })
-      .then(response => check_response(context, response))
-      .then(response => response.json())
-      .then(response => {
-        commit('files_refreshed', response);
-        return response;
-      })
-      .catch(error => {
-        commit('error', 'Failed to refresh files. Got ' + error);
-      });
+  playback_received_files({commit}, updated_files) {
+    commit('files_refreshed', updated_files);
+  },
+
+  refresh_files({dispatch}) {
+    dispatch('send_action', {
+      type: 'player',
+      action: {action: 'refresh_files'},
+    });
   },
 };
 

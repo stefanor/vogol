@@ -9,9 +9,10 @@ log = logging.getLogger(__name__)
 
 
 class VideoPlayer:
-    def __init__(self, base_dir, app, source_name):
+    def __init__(self, base_dir, broadcaster, voctomix, source_name):
         self.base_dir = Path(base_dir)
-        self.app = app
+        self.broadcaster = broadcaster
+        self.voctomix = voctomix
         self.source_name = source_name
 
         self.file = None
@@ -29,6 +30,12 @@ class VideoPlayer:
         files.sort()
         return files
 
+    def refresh_files(self):
+        return {
+            'type': 'player_files',
+            'files': self.list_files(),
+        }
+
     @property
     def state(self):
         return {
@@ -39,12 +46,16 @@ class VideoPlayer:
         }
 
     async def action(self, action=None, file=None):
-        if file is not None:
+        if action == 'load':
             await self.load_file(file)
-        if action == 'play':
+        elif action == 'play':
             await self.play()
-        if action == 'stop':
+        elif action == 'stop':
             await self.stop()
+        elif action == 'refresh_files':
+            return self.refresh_files()
+        else:
+            raise Exception(f'Unkown action {action}')
 
     async def load_file(self, filename):
         """Load a file, determine the duration"""
@@ -58,6 +69,7 @@ class VideoPlayer:
         self.file = filename
         duration = await file_duration(path)
         self.duration = format_time(duration)
+        await self.broadcast_state()
 
     async def play(self):
         """Start playback of the selected file"""
@@ -66,23 +78,24 @@ class VideoPlayer:
         if not self.file:
             raise Exception('No file selected to play')
 
-        voctomix = self.app['voctomix']
 
         path = self.base_dir / self.file
-        host = voctomix.host
-        port = voctomix.source_port(self.source_name)
-        videocaps = voctomix.mix_videocaps
-        audiocaps = voctomix.mix_audiocaps
+        host = self.voctomix.host
+        port = self.voctomix.source_port(self.source_name)
+        videocaps = self.voctomix.mix_videocaps
+        audiocaps = self.voctomix.mix_audiocaps
 
         pipeline, future = file_play(path, host, port, videocaps, audiocaps)
         self.playback_pipeline = pipeline
         self.playback_future = future
         self.playback = 'playing'
+        await self.broadcast_state()
         create_task(self.monitor_playback())
 
     async def stop(self):
         """Stop playback of the current file"""
         self.playback = 'stopped'
+        await self.broadcast_state()
         if self.playback_future:
             set_result(self.playback_future, None)
         if self.playback_pipeline:
@@ -104,13 +117,24 @@ class VideoPlayer:
                 self.playback = 'playing'
                 pos = pipeline.query_position(Gst.Format.TIME)
                 self.position = format_time(pos.cur)
+            await self.broadcast_state()
             await sleep(0.5)
+
+    async def broadcast_state(self):
+        self.broadcaster.broadcast({
+            'type': 'player_state',
+            'state': self.state,
+        })
 
 
 async def initialize_player(app):
     """Initialize the video player"""
     config = app['config']
-    player = VideoPlayer(config['recordings'], app, 'recording')
+    player = VideoPlayer(
+        base_dir=config['recordings'],
+        broadcaster=app['broadcaster'],
+        voctomix=app['voctomix'],
+        source_name='recording')
     app['player'] = player
 
 

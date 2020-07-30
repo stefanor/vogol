@@ -1,21 +1,13 @@
 import logging
 from asyncio import wait_for
 
-from aiohttp import hdrs, web
+from aiohttp import WSMsgType, hdrs, web
 
 from voctoweb.auth import require_login
 
 
 log = logging.getLogger(__name__)
 routes = web.RouteTableDef()
-
-
-def get_state(app):
-    """Current state dict for the client"""
-    return {
-        'playback': app['player'].state,
-        'voctomix': app['voctomix'].state,
-    }
 
 
 @routes.get('/')
@@ -52,38 +44,53 @@ async def preview_image(request):
     )
 
 
-@routes.post('/action')
+@routes.get('/ws')
 @require_login
-async def action(request):
-    data = await request.json()
+async def websocket_handler(request):
+    app = request.app
     player = request.app['player']
     voctomix = request.app['voctomix']
     username = request['session'].get('username', 'anon')
-    log.info('Action by %s: %r', username, data)
 
-    try:
-        if 'voctomix' in data:
-            await wait_for(voctomix.action(**data['voctomix']), timeout=1)
-        if 'playback' in data:
-            await wait_for(player.action(**data['playback']), timeout=10)
-    except TimeoutError:
-        pass
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+    wsid = app['broadcaster'].add_ws(ws)
+    log.info('WebSocket connection %i (%s) opened', wsid, username)
 
-    return web.json_response(get_state(request.app))
+    await ws.send_json({
+        'type': 'voctomix_state',
+        'state': voctomix.state,
+    })
+    await ws.send_json({
+        'type': 'player_state',
+        'state': player.state,
+    })
+    await ws.send_json({
+        'type': 'player_files',
+        'files': player.list_files(),
+    })
 
+    async for msg in ws:
+        if msg.type == WSMsgType.TEXT:
+            body = msg.json()
+            log.info('WS message from %i (%s): %r', wsid, username, body)
+            type_ = body['type']
+            action = body['action']
+            r = None
+            if type_ == 'voctomix':
+                r = await wait_for(voctomix.action(**action), timeout=1)
+            elif type_ == 'player':
+                r = await wait_for(player.action(**action), timeout=1)
+            else:
+                log.error('Unknown WS message %r from %i (%s)',
+                          body, wsid, username)
+            if r:
+                await ws.send_json(r)
+        elif msg.type == WSMsgType.ERROR:
+            log.error('WebSocket closed with %s', ws.exception())
+        else:
+            log.error('Unknown WS message %r from %i (%s)',
+                      body, wsid, username)
 
-@routes.get('/state')
-@require_login
-async def state(request):
-    return web.json_response(
-        get_state(request.app), headers={hdrs.CACHE_CONTROL: 'no-cache'})
-
-
-@routes.get('/playback/files')
-@require_login
-async def available_files(request):
-    player = request.app['player']
-    files = player.list_files()
-    return web.json_response(
-        files,
-        headers={hdrs.CACHE_CONTROL: 'no-cache'})
+    log.info('WebSocket connection %i (%s) closed', wsid, username)
+    return ws

@@ -1,8 +1,12 @@
 <template>
   <div id="app" class="content">
-    <b-navbar toggleable="lg" type="light" v-bind:variant="stream_live ? 'success' : 'danger'">
+    <b-navbar
+      toggleable="lg"
+      type="light"
+      v-bind:variant="stream_live ? 'success' : 'danger'"
+    >
       <b-navbar-brand href="#">
-        <img v-bind:src="voctoweb_logo" id="nav-logo">
+        <img v-bind:src="voctoweb_logo" id="nav-logo" />
         VoctoWeb
       </b-navbar-brand>
     </b-navbar>
@@ -82,7 +86,7 @@ export default {
     stream_live: state => state.voctomix.stream_status == 'live',
     has_error: state => !!state.ui.error,
     last_update: state => state.ui.state_last_updated,
-    logged_out: state => !state.ui.logged_in,
+    logged_out: state => state.ui.connection == 'logged_out',
     sources: state => state.voctomix.sources,
   }),
   methods: {

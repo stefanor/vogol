@@ -1,30 +1,32 @@
-import {check_response} from '../lib/helpers';
-
 const state = () => ({
+  connection: 'disconnected',
   error: null,
-  logged_in: true,
-  pollers: [],
-  preview_update_interval: 2000,
-  state_update_interval: 5000,
   state_last_updated: null,
+  ws: null,
 });
 
 const mutations = {
-  add_poller(state, poller) {
-    state.pollers.push(poller);
+  connecting(state, ws) {
+    state.connection = 'connecting';
+    state.ws = ws;
   },
 
-  clear_pollers(state) {
-    state.pollers = [];
+  connected(state) {
+    state.connection = 'connected';
+  },
+
+  disconnected(state) {
+    state.connection = 'disconnected';
+    state.ws = null;
   },
 
   error(state, error) {
-    console.log(error);
     state.error = error;
   },
 
   logout(state) {
-    state.logged_in = false;
+    state.connection = 'logged_out';
+    state.ws = null;
   },
 
   state_updated(state) {
@@ -33,10 +35,22 @@ const mutations = {
 };
 
 const actions = {
-  connect({dispatch}) {
-    dispatch('update_state')
-      .then(() => dispatch('start_polling'))
-      .then(() => dispatch('refresh_files'));
+  connect({commit, dispatch, state}) {
+    if (state.connection != 'disconnected') {
+      return;
+    }
+    const url = location.href.replace(/^http/, 'ws') + 'ws';
+    const ws = new WebSocket(url);
+    ws.addEventListener('message', ev => dispatch('ws_message', ev));
+    ws.addEventListener('close', ev => dispatch('ws_close', ev));
+    ws.addEventListener('error', ev => dispatch('ws_error', ev));
+    ws.addEventListener('open', ev => dispatch('connected', ev));
+    commit('connecting', ws);
+  },
+
+  connected({commit, dispatch}) {
+    commit('connected');
+    dispatch('start_poller', 'room');
   },
 
   logout({commit, dispatch}) {
@@ -44,73 +58,43 @@ const actions = {
     dispatch('stop_polling');
   },
 
-  start_polling({commit, dispatch, state, rootState}) {
-    const sources = ['room'].concat(rootState.voctomix.sources);
-    for (const source of sources) {
-      commit(
-        'add_poller',
-        setInterval(
-          () => dispatch('update_preview', source),
-          state.preview_update_interval
-        )
-      );
+  ws_message({commit, dispatch}, ev) {
+    const body = JSON.parse(ev.data);
+    switch (body.type) {
+      case 'voctomix_state':
+        dispatch('voctomix_received_state', body.state);
+        break;
+      case 'player_state':
+        dispatch('playback_received_state', body.state);
+        break;
+      case 'player_files':
+        dispatch('playback_received_files', body.files);
+        break;
     }
-    commit(
-      'add_poller',
-      setInterval(() => dispatch('update_state'), state.state_update_interval)
-    );
+    commit('state_updated');
   },
 
-  stop_polling({commit, state}) {
-    for (const poller of state.pollers) {
-      clearInterval(poller);
-    }
-    commit('clear_pollers');
-  },
-
-  update_state(context) {
-    return new Promise((resolve, reject) => {
-      const {commit, dispatch} = context;
-      fetch('/state', {
-        credentials: 'same-origin',
-        method: 'GET',
-      })
-        .then(response => check_response(context, response))
-        .then(response => response.json())
-        .then(response => {
-          dispatch('voctomix_received_state', response.voctomix);
-          dispatch('playback_received_state', response.playback);
-          commit('state_updated');
-          return response;
-        })
-        .then(() => resolve())
-        .catch(error => {
-          reject(error);
-        });
+  ws_error({commit, dispatch}) {
+    commit('error', 'WebSocket Error');
+    commit('disconnected');
+    // We can't see 403s from WebSockets
+    fetch('/ws', {
+      credentials: 'same-origin',
+    }).then(response => {
+      if (response.status == 403) {
+        dispatch('logout');
+      }
     });
   },
 
-  send_action(context, action) {
-    const {commit, dispatch} = context;
-    fetch('/action', {
-      credentials: 'same-origin',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(action),
-    })
-      .then(response => check_response(context, response))
-      .then(response => response.json())
-      .then(response => {
-        dispatch('voctomix_received_state', response.voctomix);
-        dispatch('playback_received_state', response.playback);
-        commit('state_updated');
-        return response;
-      })
-      .catch(error => {
-        commit('error', 'Failed to perform action. Got ' + error);
-      });
+  ws_close({commit, dispatch}) {
+    commit('error', 'WebSocket Closed');
+    commit('disconnected');
+    setTimeout(() => dispatch('connect'), 1000);
+  },
+
+  send_action({state}, action) {
+    state.ws.send(JSON.stringify(action));
   },
 };
 
