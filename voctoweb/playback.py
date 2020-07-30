@@ -84,7 +84,7 @@ class VideoPlayer:
         """Stop playback of the current file"""
         self.playback = 'stopped'
         if self.playback_future:
-            self.playback_future.set_result(None)
+            set_result(self.playback_future, None)
         if self.playback_pipeline:
             await stop_pipeline(self.playback_pipeline)
             self.plyaback_pipeline = None
