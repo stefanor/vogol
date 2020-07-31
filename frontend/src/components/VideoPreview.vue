@@ -36,6 +36,12 @@ export default {
       return !state.previews.preview_is_current[this.room];
     },
   }),
+  created() {
+    this.$store.dispatch('start_poller', this.room);
+  },
+  beforeDestroy() {
+    this.$store.dispatch('stop_poller', this.room);
+  },
 };
 </script>
 

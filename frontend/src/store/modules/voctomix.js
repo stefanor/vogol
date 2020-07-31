@@ -19,19 +19,7 @@ const actions = {
     dispatch('send_action', {type: 'voctomix', action});
   },
 
-  voctomix_received_state({dispatch, commit, state}, updated_state) {
-    const new_sources = updated_state.sources.filter(
-      x => !state.sources.includes(x)
-    );
-    for (const new_source of new_sources) {
-      dispatch('start_poller', new_source);
-    }
-    const old_sources = state.sources.filter(
-      x => !updated_state.sources.includes(x)
-    );
-    for (const old_source of old_sources) {
-      dispatch('stop_poller', old_source);
-    }
+  voctomix_received_state({commit}, updated_state) {
     commit('voctomix_state_update', updated_state);
   },
 };

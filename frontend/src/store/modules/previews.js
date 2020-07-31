@@ -44,13 +44,11 @@ const actions = {
     commit('remove_poller', source);
   },
 
-  stop_polling({dispatch, state}) {
-    for (const source of Object.keys(state.pollers)) {
-      dispatch('stop_poller', source);
+  update_preview({commit, dispatch, rootState}, source) {
+    if (rootState.websocket.connection != 'connected') {
+      commit('stale_preview', source);
+      return;
     }
-  },
-
-  update_preview({commit, dispatch}, source) {
     fetch('/preview/' + source, {
       credentials: 'same-origin',
     })

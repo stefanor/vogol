@@ -95,12 +95,8 @@ export default {
       window.location = '/login';
     },
   },
-
   created() {
     this.$store.dispatch('connect');
-  },
-  beforeDestroy() {
-    this.$store.dispatch('stop_polling');
   },
 };
 </script>

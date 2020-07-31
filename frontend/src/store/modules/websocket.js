@@ -43,14 +43,12 @@ const actions = {
     commit('connecting', ws);
   },
 
-  connected({commit, dispatch}) {
+  connected({commit}) {
     commit('connected');
-    dispatch('start_poller', 'room');
   },
 
-  logout({commit, dispatch}) {
+  logout({commit}) {
     commit('logout');
-    dispatch('stop_polling');
   },
 
   ws_message({commit, dispatch}, ev) {
