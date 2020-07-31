@@ -1,6 +1,5 @@
 const state = () => ({
   connection: 'disconnected',
-  error: null,
   state_last_updated: null,
   ws: null,
 });
@@ -18,10 +17,6 @@ const mutations = {
   disconnected(state) {
     state.connection = 'disconnected';
     state.ws = null;
-  },
-
-  error(state, error) {
-    state.error = error;
   },
 
   logout(state) {
