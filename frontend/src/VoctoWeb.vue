@@ -81,12 +81,12 @@ export default {
     voctoweb_logo: favicon_svg,
   }),
   computed: mapState({
-    error: state => state.ui.error,
+    error: state => state.websocket.error,
     disconnected: state => !state.voctomix.connected,
     stream_live: state => state.voctomix.stream_status == 'live',
-    has_error: state => !!state.ui.error,
-    last_update: state => state.ui.state_last_updated,
-    logged_out: state => state.ui.connection == 'logged_out',
+    has_error: state => !!state.websocket.error,
+    last_update: state => state.websocket.state_last_updated,
+    logged_out: state => state.websocket.connection == 'logged_out',
     sources: state => state.voctomix.sources,
   }),
   methods: {
