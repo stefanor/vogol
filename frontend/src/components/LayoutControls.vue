@@ -11,7 +11,7 @@
           v-bind:disabled="composite_mode == layout.id"
           v-on:click="set_mode(layout.id)"
         >
-          {{ layout.name }}
+          <img v-bind:src="layout.svg" v-bind:alt="layout.name">
         </button>
       </div>
     </div>
@@ -20,24 +20,32 @@
 
 <script>
 import {mapState} from 'vuex';
+import fullscreen_svg from '../img/composite-fullscreen.svg';
+import picture_in_picture_svg from '../img/composite-picture-in-picture.svg';
+import side_by_side_equal_svg from '../img/composite-side-by-side-equal.svg';
+import side_by_side_preview_svg from '../img/composite-side-by-side-preview.svg';
 
 export default {
   data: () => ({
     layouts: [
       {
         id: 'fullscreen',
+        svg: fullscreen_svg,
         name: 'Full Screen',
       },
       {
         id: 'side_by_side_equal',
+        svg: side_by_side_equal_svg,
         name: 'Side by Side',
       },
       {
         id: 'side_by_side_preview',
+        svg: side_by_side_preview_svg,
         name: 'Side by Side Preview',
       },
       {
         id: 'picture_in_picture',
+        svg: picture_in_picture_svg,
         name: 'Picture in Picture',
       },
     ],
