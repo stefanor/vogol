@@ -3,19 +3,10 @@ import Vue from 'vue';
 const state = () => ({
   preview_is_current: {},
   previews: {},
-  pollers: {},
-  preview_update_interval: 2000,
+  update_interval: 2000,
 });
 
 const mutations = {
-  add_poller(state, {source, poller}) {
-    Vue.set(state.pollers, source, poller);
-  },
-
-  remove_poller(state, source) {
-    Vue.delete(state.pollers, source);
-  },
-
   preview_image(state, {source, img}) {
     Vue.set(state.previews, source, img);
     Vue.set(state.preview_is_current, source, true);
@@ -27,23 +18,6 @@ const mutations = {
 };
 
 const actions = {
-  start_poller({commit, dispatch, state}, source) {
-    if (source in state.pollers) {
-      return;
-    }
-    const poller = window.setInterval(
-      () => dispatch('update_preview', source),
-      state.preview_update_interval
-    );
-    commit('add_poller', {source, poller});
-  },
-
-  stop_poller({commit, state}, source) {
-    const poller = state.pollers[source];
-    clearInterval(poller);
-    commit('remove_poller', source);
-  },
-
   update_preview({commit, dispatch, rootState}, source) {
     if (rootState.websocket.connection != 'connected') {
       commit('stale_preview', source);

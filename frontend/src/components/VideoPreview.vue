@@ -13,6 +13,7 @@ export default {
   props: ['room'],
   data: () => ({
     last_object_url: null,
+    stop_previews: false,
   }),
   computed: mapState({
     isRoom() {
@@ -37,10 +38,20 @@ export default {
     },
   }),
   created() {
-    this.$store.dispatch('start_poller', this.room);
+    const update_preview = () => {
+      if (this.stop_previews) {
+        return;
+      }
+      this.$store.dispatch('update_preview', this.room);
+      window.setTimeout(
+        update_preview,
+        this.$store.state.previews.update_interval
+      );
+    };
+    update_preview();
   },
   beforeDestroy() {
-    this.$store.dispatch('stop_poller', this.room);
+    this.stop_previews = true;
   },
 };
 </script>
