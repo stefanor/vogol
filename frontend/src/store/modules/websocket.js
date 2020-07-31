@@ -45,6 +45,7 @@ const actions = {
 
   connected({commit}) {
     commit('connected');
+    commit('remove_error', 'ws');
   },
 
   logout({commit}) {
@@ -68,7 +69,11 @@ const actions = {
   },
 
   ws_error({commit, dispatch}) {
-    commit('error', 'WebSocket Error');
+    commit('add_error', {
+      key: 'ws',
+      message: 'WebSocket Error',
+      priority: 100,
+    });
     commit('disconnected');
     // We can't see 403s from WebSockets
     fetch('/ws', {
@@ -81,7 +86,11 @@ const actions = {
   },
 
   ws_close({commit, dispatch}) {
-    commit('error', 'WebSocket Closed');
+    commit('add_error', {
+      key: 'ws',
+      message: 'WebSocket Closed',
+      priority: 100,
+    });
     commit('disconnected');
     setTimeout(() => dispatch('connect'), 1000);
   },

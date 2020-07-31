@@ -1,10 +1,27 @@
 const state = () => ({
-  error: null,
+  errors: [],
 });
 
 const mutations = {
-  error(state, error) {
-    state.error = error;
+  add_error(state, {key, message, priority}) {
+    state.errors = state.errors.filter(error => error.key != key);
+    const timestamp = new Date();
+    state.errors.push({
+      key,
+      message,
+      priority,
+      timestamp,
+    });
+    state.errors.sort((a, b) => {
+      if (a.priority != b.priority) {
+        return b.priority - a.priority;
+      }
+      return a.timestamp - b.timestamp;
+    });
+  },
+
+  remove_error(state, key) {
+    state.errors = state.errors.filter(error => error.key != key);
   },
 };
 

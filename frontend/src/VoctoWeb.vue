@@ -13,8 +13,15 @@
     <b-alert variant="danger" v-model="disconnected">
       <strong>Disconnected from core</strong>
     </b-alert>
-    <b-alert variant="danger" v-model="has_error">
-      <strong>Error:</strong> {{ error }}
+    <b-alert
+      variant="danger"
+      v-for="error in errors"
+      v-bind:key="error.key"
+      v-on:dismissed="dismiss_error(error)"
+      show
+      dismissible
+    >
+      <strong>Error:</strong> {{ error.message }}
     </b-alert>
     <div class="row">
       <RoomPreview />
@@ -81,15 +88,17 @@ export default {
     voctoweb_logo: favicon_svg,
   }),
   computed: mapState({
-    error: state => state.errors.error,
+    errors: state => state.errors.errors,
     disconnected: state => !state.voctomix.connected,
     stream_live: state => state.voctomix.stream_status == 'live',
-    has_error: state => !!state.errors.error,
     last_update: state => state.websocket.state_last_updated,
     logged_out: state => state.websocket.connection == 'logged_out',
     sources: state => state.voctomix.sources,
   }),
   methods: {
+    dismiss_error(error) {
+      this.$store.commit('remove_error', error.key);
+    },
     loginButton(event) {
       event.preventDefault();
       window.location = '/login';

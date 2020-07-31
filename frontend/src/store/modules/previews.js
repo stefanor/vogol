@@ -38,13 +38,15 @@ const actions = {
       .then(img => {
         if (img) {
           commit('preview_image', {source, img});
+          commit('remove_error', 'preview_' + source);
         }
       })
       .catch(error => {
-        commit(
-          'error',
-          'Failed to update preview for ' + source + ' got ' + error
-        );
+        commit('add_error', {
+          key: 'preview_' + source,
+          message: 'Failed to update preview for ' + source + ' got ' + error,
+          priority: 10,
+        });
       });
   },
 };
