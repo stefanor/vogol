@@ -18,10 +18,6 @@ const actions = {
   voctomix_action({dispatch}, action) {
     dispatch('send_action', {type: 'voctomix', action});
   },
-
-  voctomix_received_state({commit}, updated_state) {
-    commit('voctomix_state_update', updated_state);
-  },
 };
 
 export default {

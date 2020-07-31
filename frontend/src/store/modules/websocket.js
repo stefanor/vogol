@@ -51,17 +51,17 @@ const actions = {
     commit('logout');
   },
 
-  ws_message({commit, dispatch}, ev) {
+  ws_message({commit}, ev) {
     const body = JSON.parse(ev.data);
     switch (body.type) {
       case 'voctomix_state':
-        dispatch('voctomix_received_state', body.state);
+        commit('voctomix_state_update', body.state);
         break;
       case 'player_state':
-        dispatch('playback_received_state', body.state);
+        commit('playback_state_update', body.state);
         break;
       case 'player_files':
-        dispatch('playback_received_files', body.files);
+        commit('playback_files_update', body.files);
         break;
     }
     commit('state_updated');

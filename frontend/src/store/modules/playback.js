@@ -11,7 +11,7 @@ const mutations = {
     Object.assign(state, incoming);
   },
 
-  files_refreshed(state, files) {
+  playback_files_update(state, files) {
     state.files = files;
   },
 };
@@ -47,14 +47,6 @@ const actions = {
       }
     }
     dispatch('send_action', {type: 'player', action});
-  },
-
-  playback_received_state({commit}, updated_state) {
-    commit('playback_state_update', updated_state);
-  },
-
-  playback_received_files({commit}, updated_files) {
-    commit('files_refreshed', updated_files);
   },
 
   refresh_files({dispatch}) {
