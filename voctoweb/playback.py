@@ -169,8 +169,9 @@ def file_play(path, host, port, videocaps, audiocaps):
 
     demux.
     ! queue
+    ! capssetter name=vid_cap_setter
     ! videoconvert
-    ! yadif
+    ! deinterlace
     ! videorate
     ! videoscale
     ! {videocaps}
@@ -197,6 +198,13 @@ def file_play(path, host, port, videocaps, audiocaps):
 
     pipeline.bus.add_signal_watch()
     pipeline.bus.connect('message::eos', eos_report_none, playback_future)
+
+    if Gst.version() < (1, 15, 1) and path.suffix in ('.webm', '.mkv'):
+        # Work around https://bugzilla.gnome.org/show_bug.cgi?id=787206
+        # Assume video is progressive
+        vid_cap_setter = pipeline.get_by_name('vid_cap_setter')
+        cap = Gst.Caps.from_string('video/x-raw,interlace-mode=progressive')
+        vid_cap_setter.set_property('caps', cap)
 
     src = pipeline.get_by_name('src')
     src.set_property('location', path)
