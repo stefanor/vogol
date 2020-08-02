@@ -5,15 +5,15 @@
       <div class="current-layout badge badge-info">{{ layout_name }}</div>
     </div>
     <div class="card-body">
-      <div v-for="layout in layouts" v-bind:key="layout.id">
-        <button
-          class="btn btn-info"
-          v-bind:disabled="composite_mode == layout.id"
-          v-on:click="set_mode(layout.id)"
-        >
-          <img v-bind:src="layout.svg" v-bind:alt="layout.name">
-        </button>
-      </div>
+      <button
+        v-for="layout in layouts"
+        v-bind:key="layout.id"
+        class="btn btn-secondary"
+        v-bind:disabled="composite_mode == layout.id"
+        v-on:click="set_mode(layout.id)"
+      >
+        <img v-bind:src="layout.svg" v-bind:alt="layout.name" />
+      </button>
     </div>
   </div>
 </template>
