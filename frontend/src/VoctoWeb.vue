@@ -3,7 +3,7 @@
     <b-navbar
       toggleable="lg"
       type="light"
-      v-bind:variant="stream_live ? 'success' : 'danger'"
+      v-bind:variant="all_good ? 'success' : 'danger'"
     >
       <b-navbar-brand href="#">
         <img v-bind:src="voctoweb_logo" id="nav-logo" />
@@ -88,9 +88,10 @@ export default {
     voctoweb_logo: favicon_svg,
   }),
   computed: mapState({
+    all_good: state =>
+      state.voctomix.stream_status == 'live' && state.voctomix.connected,
     errors: state => state.errors.errors,
     disconnected: state => !state.voctomix.connected,
-    stream_live: state => state.voctomix.stream_status == 'live',
     last_update: state => state.websocket.state_last_updated,
     logged_out: state => state.websocket.connection == 'logged_out',
     sources: state => state.voctomix.sources,
