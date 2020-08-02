@@ -31,8 +31,9 @@
     </div>
     <div class="row">
       <VoctomixSource
-        v-for="source in sources"
+        v-for="(source, source_index) in sources"
         v-bind:source="source"
+        v-bind:index="source_index"
         v-bind:key="source"
       />
     </div>

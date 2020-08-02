@@ -9,7 +9,7 @@
           class="btn source"
           v-bind:class="{'source-a': source_a, 'btn-light': !source_a}"
           v-bind:disabled="source_a"
-          v-on:click="send('set_a')"
+          v-on:click="set_a"
         >
           A
         </button>
@@ -17,7 +17,7 @@
           class="btn source"
           v-bind:class="{'source-b': source_b, 'btn-light': !source_b}"
           v-bind:disabled="source_b"
-          v-on:click="send('set_b')"
+          v-on:click="set_b"
         >
           B
         </button>
@@ -28,7 +28,7 @@
       <button
         class="btn source-a"
         v-bind:disabled="is_fullscreen"
-        v-on:click="send('fullscreen')"
+        v-on:click="fullscreen"
       >
         Fullscreen
       </button>
@@ -46,7 +46,7 @@ import AudioControl from './AudioControl.vue';
 import VideoPreview from './VideoPreview.vue';
 
 export default {
-  props: ['source'],
+  props: ['source', 'index'],
   components: {
     AudioControl,
     VideoPreview,
@@ -66,10 +66,40 @@ export default {
     },
   }),
   methods: {
+    fullscreen() {
+      this.send('fullscreen');
+    },
+    on_key_down(ev) {
+      const source_number = this.index + 1;
+      if (ev.key == source_number && !ev.shiftKey) {
+        if (!ev.ctrlKey && !ev.altKey) {
+          ev.preventDefault();
+          this.set_a();
+        } else if (ev.ctrlKey && !ev.altKey) {
+          ev.preventDefault();
+          this.set_b();
+        } else if (!ev.ctrlKey && ev.altKey) {
+          ev.preventDefault();
+          this.fullscreen();
+        }
+      }
+    },
+    set_a() {
+      this.send('set_a');
+    },
+    set_b() {
+      this.send('set_b');
+    },
     send(action) {
       const source = this.source;
       this.$store.dispatch('voctomix_action', {action, source});
     },
+  },
+  mounted() {
+    window.addEventListener('keydown', this.on_key_down);
+  },
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.on_key_down);
   },
 };
 </script>

@@ -10,7 +10,7 @@
       <button
         class="btn btn-success"
         v-bind:disabled="live"
-        v-on:click="send('stream_live')"
+        v-on:click="stream_live"
       >
         Go Live
       </button>
@@ -18,19 +18,19 @@
       <button
         class="btn btn-danger"
         v-bind:disabled="loop"
-        v-on:click="send('stream_loop')"
+        v-on:click="stream_loop"
       >
         Loop
       </button>
       <button
         class="btn btn-danger"
         v-bind:disabled="blank"
-        v-on:click="send('stream_blank')"
+        v-on:click="stream_blank"
       >
         Blank
       </button>
       <br />
-      <button class="btn btn-secondary" v-on:click="send('cut')">
+      <button class="btn btn-secondary" v-on:click="cut">
         Cut
       </button>
     </div>
@@ -54,9 +54,39 @@ export default {
     },
   }),
   methods: {
+    cut() {
+      this.send('cut');
+    },
+    on_key_down(ev) {
+      if (ev.key == 'F11') {
+        ev.preventDefault();
+        this.stream_loop();
+      } else if (ev.key == 'F12') {
+        ev.preventDefault();
+        this.stream_live();
+      } else if (ev.key == 't') {
+        ev.preventDefault();
+        this.cut();
+      }
+    },
     send(action) {
       this.$store.dispatch('voctomix_action', {action});
     },
+    stream_blank() {
+      this.send('stream_blank');
+    },
+    stream_live() {
+      this.send('stream_live');
+    },
+    stream_loop() {
+      this.send('stream_loop');
+    },
+  },
+  mounted() {
+    window.addEventListener('keydown', this.on_key_down);
+  },
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.on_key_down);
   },
 };
 </script>
