@@ -1,13 +1,28 @@
 <template>
   <div class="audio-control">
     <div class="volume">
+      <b-popover
+        v-bind:target="'volume-badge-' + source"
+        triggers="hover"
+        placement="top"
+        title="Fader (dB)"
+      >
+        <b-form-input
+          type="range"
+          v-model="volume_db"
+          step="0.5"
+          min="-20"
+          max="10"
+        ></b-form-input>
+      </b-popover>
       <div
         class="badge badge-info"
+        v-bind:id="'volume-badge-' + source"
         v-bind:class="[muted ? 'badge-danger' : 'badge-success']"
       >
         <b-icon-volume-mute-fill scale="1.5" v-if="muted" />
         <b-icon-volume-up-fill scale="1.5" v-else />
-        {{ volume }} %
+        {{ volume_db }} dB ({{ volume_percent }} %)
       </div>
     </div>
     <button
@@ -19,34 +34,59 @@
     </button>
     <button
       class="btn btn-success"
-      v-bind:disabled="!muted"
+      v-bind:disabled="unity"
       v-on:click="send('unmute')"
     >
-      Un-Mute
+      0 db
     </button>
   </div>
 </template>
 
 <script>
-import {BIconVolumeUpFill, BIconVolumeMuteFill} from 'bootstrap-vue';
-import {mapState} from 'vuex';
+import {
+  BFormInput,
+  BIconVolumeUpFill,
+  BIconVolumeMuteFill,
+  BPopover,
+} from 'bootstrap-vue';
 
 export default {
   props: ['source'],
   components: {
+    BFormInput,
     BIconVolumeUpFill,
     BIconVolumeMuteFill,
+    BPopover,
   },
-  computed: mapState({
+  computed: {
     muted() {
-      return this.volume < 20;
+      return this.volume < 0.2;
     },
-    volume(state) {
-      const volume_fraction = state.voctomix.audio[this.source];
-      const volume_percent = Math.trunc(volume_fraction * 100);
+    unity() {
+      return this.volume == 1;
+    },
+    volume() {
+      return this.$store.state.voctomix.audio[this.source];
+    },
+    volume_db: {
+      get() {
+        const db = this.volume > 0 ? 20.0 * Math.log10(this.volume) : -20;
+        return Number.parseFloat(db).toFixed(1);
+      },
+      set(value) {
+        const volume = value > -20.0 ? 10 ** (value / 20) : 0;
+        this.$store.dispatch('voctomix_action', {
+          action: 'set_audio_volume',
+          source: this.source,
+          volume: volume,
+        });
+      },
+    },
+    volume_percent() {
+      const volume_percent = Math.trunc(this.volume * 100);
       return volume_percent;
     },
-  }),
+  },
   methods: {
     send(action) {
       const source = this.source;

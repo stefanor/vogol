@@ -87,7 +87,7 @@ class Voctomix:
     def mix_videocaps(self):
         return self.control.config['mix']['videocaps']
 
-    async def action(self, action, source=None, mode=None):
+    async def action(self, action, source=None, mode=None, volume=None):
         """Fire an action requested by the client"""
         send = self.control.send
         if action == 'fullscreen':
@@ -105,6 +105,8 @@ class Voctomix:
             await send('set_stream_blank', 'nostream')
         elif action == 'stream_loop':
             await send('set_stream_blank', 'loop')
+        elif action == 'set_audio_volume':
+            await send('set_audio_volume', source, str(volume))
         elif action == 'mute':
             await send('set_audio_volume', source, '0')
         elif action == 'unmute':
