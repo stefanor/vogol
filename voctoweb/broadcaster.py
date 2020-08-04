@@ -3,7 +3,7 @@ from itertools import count
 from weakref import WeakValueDictionary
 import json
 
-import bson
+from bson import BSON
 
 
 class WSBroadcaster:
@@ -20,7 +20,7 @@ class WSBroadcaster:
     def broadcast(self, message):
         if message['type'] == 'preview':
             fn = self.send_bytes
-            data = bson.dumps(message)
+            data = BSON.encode(message)
         else:
             fn = self.send_str
             data = json.dumps(message)
