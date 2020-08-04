@@ -13,7 +13,6 @@ export default {
   props: ['room'],
   data: () => ({
     last_object_url: null,
-    stop_previews: false,
   }),
   computed: mapState({
     isRoom() {
@@ -37,22 +36,6 @@ export default {
       return !state.previews.preview_is_current[this.room];
     },
   }),
-  created() {
-    const update_preview = () => {
-      if (this.stop_previews) {
-        return;
-      }
-      this.$store.dispatch('update_preview', this.room);
-      window.setTimeout(
-        update_preview,
-        this.$store.state.previews.update_interval
-      );
-    };
-    update_preview();
-  },
-  beforeDestroy() {
-    this.stop_previews = true;
-  },
 };
 </script>
 

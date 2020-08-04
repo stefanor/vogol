@@ -17,42 +17,7 @@ const mutations = {
   },
 };
 
-const actions = {
-  update_preview({commit, dispatch, rootState}, source) {
-    if (rootState.websocket.connection != 'connected') {
-      commit('stale_preview', source);
-      return;
-    }
-    fetch('/preview/' + source, {
-      credentials: 'same-origin',
-    })
-      .then(response => {
-        if (response.status == 403) {
-          dispatch('logout');
-        } else if (response.ok) {
-          return response.blob();
-        } else {
-          commit('stale_preview', source);
-        }
-      })
-      .then(img => {
-        if (img) {
-          commit('preview_image', {source, img});
-          commit('remove_error', 'preview_' + source);
-        }
-      })
-      .catch(error => {
-        commit('add_error', {
-          key: 'preview_' + source,
-          message: 'Failed to update preview for ' + source + ' got ' + error,
-          priority: 10,
-        });
-      });
-  },
-};
-
 export default {
-  actions,
   mutations,
   state,
 };

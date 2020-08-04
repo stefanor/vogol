@@ -15,11 +15,12 @@
     "@vue/cli-service": "4.x",
     "babel-eslint": "10.x",
     "bootstrap-vue": "2.x",
+    "bson": "4.x",
     "eslint": "6.x",
     "eslint-plugin-vue": "6.x",
     "lodash": "4.x",
-    "vue-template-compiler": "2.x",
     "vue": "2.x",
+    "vue-template-compiler": "2.x",
     "vuex": "3.x"
   },
   "eslintConfig": {

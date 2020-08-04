@@ -15,7 +15,6 @@ class Voctomix:
     def __init__(self, host, broadcaster, gst_pipelines):
         self.host = host
         self.control = VoctomixControl(host, self)
-        self.previews = {}
         self.preview_tasks = {}
         self.reconnection_task = None
         self.broadcaster = broadcaster
@@ -68,8 +67,8 @@ class Voctomix:
     async def preview_task(self, source, port):
         """Start and monitor a preview pipeline"""
         while True:
-            await preview_pipeline(self.host, port, source, self.previews,
-                                   self.gst_pipelines)
+            await preview_pipeline(
+                self.host, port, source, self.broadcaster, self.gst_pipelines)
             await sleep(5)
 
     @property

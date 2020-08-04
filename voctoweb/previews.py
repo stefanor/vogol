@@ -7,7 +7,7 @@ from voctoweb.gst import Gst, stop_pipeline
 log = logging.getLogger(__name__)
 
 
-async def preview_pipeline(host, port, source, previews, gst_pipelines):
+async def preview_pipeline(host, port, source, broadcaster, gst_pipelines):
     """Start a pipeline to generate preview images from source, every second"""
     log.info('Attempting to start preview pipeline for %s polling %s:%s',
              source, host, port)
@@ -29,7 +29,8 @@ async def preview_pipeline(host, port, source, previews, gst_pipelines):
     src.set_property('port', port)
 
     sink = pipeline.get_by_name('sink')
-    sink.connect('new-sample', new_sample, source, previews)
+    loop = get_running_loop()
+    sink.connect('new-sample', new_sample, source, broadcaster, loop)
 
     completion = get_running_loop().create_future()
     bus = pipeline.bus
@@ -41,7 +42,6 @@ async def preview_pipeline(host, port, source, previews, gst_pipelines):
     gst_pipelines[source] = pipeline
 
     await completion
-    previews[source] = None
     await stop_pipeline(pipeline)
 
 
@@ -68,10 +68,10 @@ def gst_message(bus, message, completion, source):
         loop.call_soon_threadsafe(stream_ended, completion, type_)
 
 
-def new_sample(sink, source, previews):
+def new_sample(sink, source, broadcaster, loop):
     """GLib thread callback: GstAppSink has a new frame ready
 
-    Save it in the previews dict.
+    Broadcast it to clients.
     """
 
     sample = sink.emit('pull-sample')
@@ -83,6 +83,12 @@ def new_sample(sink, source, previews):
     if not status:
         return Gst.FlowReturn.ERROR
 
-    previews[source] = mapinfo.data
+    loop.call_soon_threadsafe(
+        broadcaster.broadcast, {
+            'type': 'preview',
+            'source': source,
+            'jpeg': mapinfo.data,
+        }
+    )
 
     return Gst.FlowReturn.OK

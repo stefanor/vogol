@@ -29,21 +29,6 @@ async def static(request):
     return web.FileResponse(f'frontend/dist/{component}/{filename}')
 
 
-@routes.get('/preview/{source:[a-z0-9-]+}')
-@require_login
-async def preview_image(request):
-    source = request.match_info['source']
-    voctomix = request.app['voctomix']
-    preview = voctomix.previews.get(source)
-    if not preview:
-        raise web.HTTPNotFound()
-    return web.Response(
-        body=preview,
-        content_type='image/jpeg',
-        headers={hdrs.CACHE_CONTROL: 'no-cache'},
-    )
-
-
 @routes.get('/ws')
 @require_login
 async def websocket_handler(request):

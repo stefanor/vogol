@@ -1,3 +1,5 @@
+import {deserialize} from 'bson';
+
 const state = () => ({
   connection: 'disconnected',
   state_last_updated: null,
@@ -36,7 +38,8 @@ const actions = {
     }
     const url = location.href.replace(/^http/, 'ws') + 'ws';
     const ws = new WebSocket(url);
-    ws.addEventListener('message', ev => dispatch('ws_message', ev));
+    ws.binaryType = 'arraybuffer';
+    ws.addEventListener('message', ev => dispatch('ws_message_raw', ev));
     ws.addEventListener('close', ev => dispatch('ws_close', ev));
     ws.addEventListener('error', ev => dispatch('ws_error', ev));
     ws.addEventListener('open', ev => dispatch('connected', ev));
@@ -52,8 +55,17 @@ const actions = {
     commit('logout');
   },
 
-  ws_message({commit}, ev) {
-    const body = JSON.parse(ev.data);
+  ws_message_raw({dispatch}, ev) {
+    if (typeof ev.data == 'string') {
+      const body = JSON.parse(ev.data);
+      dispatch('ws_message_deserialized', body);
+    } else if (ev.data instanceof ArrayBuffer) {
+      const body = deserialize(new Uint8Array(ev.data));
+      dispatch('ws_message_deserialized', body);
+    }
+  },
+
+  ws_message_deserialized({commit}, body) {
     switch (body.type) {
       case 'voctomix_state':
         commit('voctomix_state_update', body.state);
@@ -63,6 +75,12 @@ const actions = {
         break;
       case 'player_files':
         commit('playback_files_update', body.files);
+        break;
+      case 'preview':
+        commit('preview_image', {
+          source: body.source,
+          img: new Blob([body.jpeg.buffer], {type: 'image/jpeg'}),
+        });
         break;
     }
     commit('state_updated');
