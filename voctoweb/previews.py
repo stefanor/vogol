@@ -82,12 +82,15 @@ def new_sample(sink, source, broadcaster, loop):
     status, mapinfo = buf.map(Gst.MapFlags.READ)
     if not status:
         return Gst.FlowReturn.ERROR
+    # Feels like there should be a better way
+    jpeg = bytes(bytearray(mapinfo.data))
+    buf.unmap(mapinfo)
 
     loop.call_soon_threadsafe(
         broadcaster.broadcast, {
             'type': 'preview',
             'source': source,
-            'jpeg': mapinfo.data,
+            'jpeg': jpeg,
         }
     )
 
