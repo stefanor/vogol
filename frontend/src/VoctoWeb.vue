@@ -9,6 +9,7 @@
         <img v-bind:src="voctoweb_logo" id="nav-logo" />
         VoctoWeb
       </b-navbar-brand>
+      <NavBarControls />
     </b-navbar>
     <main class="container-fluid">
       <b-alert variant="danger" v-model="disconnected">
@@ -26,8 +27,6 @@
       </b-alert>
       <div class="row">
         <RoomPreview />
-        <StreamControls />
-        <LayoutControls />
         <PlaybackControls />
       </div>
       <div class="row">
@@ -70,10 +69,9 @@ import Vue from 'vue';
 import {AlertPlugin, NavbarPlugin, ModalPlugin} from 'bootstrap-vue';
 import {mapState} from 'vuex';
 
-import RoomPreview from './components/RoomPreview.vue';
-import StreamControls from './components/StreamControls.vue';
-import LayoutControls from './components/LayoutControls.vue';
+import NavBarControls from './components/NavBarControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
+import RoomPreview from './components/RoomPreview.vue';
 import VoctomixSource from './components/VoctomixSource.vue';
 import favicon_svg from './favicon/favicon.svg';
 
@@ -84,10 +82,9 @@ Vue.use(NavbarPlugin);
 export default {
   name: 'VoctoWeb',
   components: {
-    LayoutControls,
+    NavBarControls,
     PlaybackControls,
     RoomPreview,
-    StreamControls,
     VoctomixSource,
   },
   data: () => ({
