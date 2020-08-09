@@ -28,6 +28,7 @@
       <div class="row">
         <RoomPreview />
         <PlaybackControls />
+        <ConnectedUsers />
       </div>
       <div class="row">
         <VoctomixSource
@@ -69,6 +70,7 @@ import Vue from 'vue';
 import {AlertPlugin, NavbarPlugin, ModalPlugin} from 'bootstrap-vue';
 import {mapState} from 'vuex';
 
+import ConnectedUsers from './components/ConnectedUsers.vue';
 import NavBarControls from './components/NavBarControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
 import RoomPreview from './components/RoomPreview.vue';
@@ -82,6 +84,7 @@ Vue.use(NavbarPlugin);
 export default {
   name: 'VoctoWeb',
   components: {
+    ConnectedUsers,
     NavBarControls,
     PlaybackControls,
     RoomPreview,

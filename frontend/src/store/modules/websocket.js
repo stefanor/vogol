@@ -67,20 +67,26 @@ const actions = {
 
   ws_message_deserialized({commit}, body) {
     switch (body.type) {
-      case 'voctomix_state':
-        commit('voctomix_state_update', body.state);
-        break;
-      case 'player_state':
-        commit('playback_state_update', body.state);
+      case 'connected_users':
+        commit('users_update', body.users);
         break;
       case 'player_files':
         commit('playback_files_update', body.files);
+        break;
+      case 'player_state':
+        commit('playback_state_update', body.state);
         break;
       case 'preview':
         commit('preview_image', {
           source: body.source,
           img: new Blob([body.jpeg.buffer], {type: 'image/jpeg'}),
         });
+        break;
+      case 'voctomix_state':
+        commit('voctomix_state_update', body.state);
+        break;
+      case 'username':
+        commit('users_logged_in', body.username);
         break;
     }
     commit('state_updated');

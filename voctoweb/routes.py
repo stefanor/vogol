@@ -33,13 +33,14 @@ async def static(request):
 @require_login
 async def websocket_handler(request):
     app = request.app
+    broadcaster = app['broadcaster']
     player = request.app['player']
     voctomix = request.app['voctomix']
     username = request['session'].get('username', 'anon')
 
     ws = web.WebSocketResponse()
     await ws.prepare(request)
-    wsid = app['broadcaster'].add_ws(ws)
+    wsid = broadcaster.add_ws(ws, username)
     log.info('WebSocket connection %i (%s) opened', wsid, username)
 
     await ws.send_json({
@@ -54,28 +55,34 @@ async def websocket_handler(request):
         'type': 'player_files',
         'files': player.list_files(),
     })
+    await ws.send_json({
+        'type': 'username',
+        'username': username,
+    })
 
-    async for msg in ws:
-        if msg.type == WSMsgType.TEXT:
-            body = msg.json()
-            log.info('WS message from %i (%s): %r', wsid, username, body)
-            type_ = body['type']
-            action = body['action']
-            r = None
-            if type_ == 'voctomix':
-                r = await wait_for(voctomix.action(**action), timeout=1)
-            elif type_ == 'player':
-                r = await wait_for(player.action(**action), timeout=1)
+    try:
+        async for msg in ws:
+            if msg.type == WSMsgType.TEXT:
+                body = msg.json()
+                log.info('WS message from %i (%s): %r', wsid, username, body)
+                type_ = body['type']
+                action = body['action']
+                r = None
+                if type_ == 'voctomix':
+                    r = await wait_for(voctomix.action(**action), timeout=1)
+                elif type_ == 'player':
+                    r = await wait_for(player.action(**action), timeout=1)
+                else:
+                    log.error('Unknown WS message %r from %i (%s)',
+                              body, wsid, username)
+                if r:
+                    await ws.send_json(r)
+            elif msg.type == WSMsgType.ERROR:
+                log.error('WebSocket closed with %s', ws.exception())
             else:
                 log.error('Unknown WS message %r from %i (%s)',
                           body, wsid, username)
-            if r:
-                await ws.send_json(r)
-        elif msg.type == WSMsgType.ERROR:
-            log.error('WebSocket closed with %s', ws.exception())
-        else:
-            log.error('Unknown WS message %r from %i (%s)',
-                      body, wsid, username)
-
-    log.info('WebSocket connection %i (%s) closed', wsid, username)
-    return ws
+    finally:
+        log.info('WebSocket connection %i (%s) closed', wsid, username)
+        broadcaster.remove_ws(username, wsid)
+        return ws

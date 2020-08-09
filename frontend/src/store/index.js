@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import errors from './modules/errors';
 import playback from './modules/playback';
 import previews from './modules/previews';
+import users from './modules/users';
 import voctomix from './modules/voctomix';
 import websocket from './modules/websocket';
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
     errors,
     playback,
     previews,
+    users,
     voctomix,
     websocket,
   },

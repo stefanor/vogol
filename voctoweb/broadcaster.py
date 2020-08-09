@@ -11,11 +11,25 @@ class WSBroadcaster:
         self.wsid_iter = count()
         self.websockets = WeakValueDictionary()
 
-    def add_ws(self, ws):
+    def add_ws(self, ws, username):
         """Add a websocket to the pool, return its id"""
         wsid = next(self.wsid_iter)
-        self.websockets[wsid] = ws
+        self.websockets[(username, wsid)] = ws
+        self.broadcast_connected_users()
         return wsid
+
+    def remove_ws(self, username, wsid):
+        self.websockets.pop((username, wsid))
+        self.broadcast_connected_users()
+
+    def list_connected_users(self):
+        return sorted(set(username for username, wsid in self.websockets))
+
+    def broadcast_connected_users(self):
+        self.broadcast({
+            'type': 'connected_users',
+            'users': self.list_connected_users(),
+        })
 
     def broadcast(self, message):
         if message['type'] == 'preview':
