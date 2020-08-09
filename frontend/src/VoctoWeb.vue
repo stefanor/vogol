@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="content">
+  <div id="app">
     <b-navbar
       toggleable="lg"
       type="light"
@@ -10,40 +10,45 @@
         VoctoWeb
       </b-navbar-brand>
     </b-navbar>
-    <b-alert variant="danger" v-model="disconnected">
-      <strong>Disconnected from core</strong>
-    </b-alert>
-    <b-alert
-      variant="danger"
-      v-for="error in errors"
-      v-bind:key="error.key"
-      v-on:dismissed="dismiss_error(error)"
-      show
-      dismissible
-    >
-      <strong>Error:</strong> {{ error.message }}
-    </b-alert>
-    <div class="row">
-      <RoomPreview />
-      <StreamControls />
-      <LayoutControls />
-      <PlaybackControls />
-    </div>
-    <div class="row">
-      <VoctomixSource
-        v-for="(source, source_index) in sources"
-        v-bind:source="source"
-        v-bind:index="source_index"
-        v-bind:key="source"
-      />
-    </div>
-    <div>Last updated: {{ last_update }}</div>
-    <div>
-      Source:
-      <a href="https://salsa.debian.org/debconf-video-team/voctoweb"
-        >on Salsa</a
+    <main class="container-fluid">
+      <b-alert variant="danger" v-model="disconnected">
+        <strong>Disconnected from core</strong>
+      </b-alert>
+      <b-alert
+        variant="danger"
+        v-for="error in errors"
+        v-bind:key="error.key"
+        v-on:dismissed="dismiss_error(error)"
+        show
+        dismissible
       >
-    </div>
+        <strong>Error:</strong> {{ error.message }}
+      </b-alert>
+      <div class="row">
+        <RoomPreview />
+        <StreamControls />
+        <LayoutControls />
+        <PlaybackControls />
+      </div>
+      <div class="row">
+        <VoctomixSource
+          v-for="(source, source_index) in sources"
+          v-bind:source="source"
+          v-bind:index="source_index"
+          v-bind:key="source"
+        />
+      </div>
+    </main>
+    <footer class="footer mt-auto py-3 bg-light">
+      <div class="container-fluid">
+        <span class="text-muted">
+          Source:
+          <a href="https://salsa.debian.org/debconf-video-team/voctoweb"
+            >on Salsa</a
+          >
+        </span>
+      </div>
+    </footer>
     <b-modal
       title="Not Logged In"
       ok-title="Login"
@@ -115,5 +120,21 @@ export default {
 <style>
 #nav-logo {
   max-height: 1.5em;
+}
+
+/* Sticky footer: */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 3rem;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 3rem;
+  padding-left: 1rem;
 }
 </style>
