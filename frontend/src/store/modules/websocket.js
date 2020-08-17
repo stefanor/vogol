@@ -82,6 +82,14 @@ const actions = {
           img: new Blob([body.jpeg.buffer], {type: 'image/jpeg'}),
         });
         break;
+      case 'preview_audio_level':
+        commit('preview_audio_level', {
+          source: body.source,
+          rms: body.rms,
+          peak: body.peak,
+          decay: body.decay,
+        })
+        break;
       case 'voctomix_state':
         commit('voctomix_state_update', body.state);
         break;

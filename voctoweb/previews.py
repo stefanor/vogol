@@ -14,13 +14,23 @@ async def preview_pipeline(host, port, source, broadcaster, gst_pipelines):
 
     pipeline = Gst.parse_launch("""
     tcpclientsrc name=src
-    ! matroskademux
+    ! matroskademux name=demux
+
+    demux.
+    ! queue
+    ! audioconvert
+    ! audio/x-raw, channels=1
+    ! level interval=1000000000
+    ! fakesink
+
+    demux.
+    ! queue
     ! videoconvert
     ! videorate max-rate=1
     ! videoscale
     ! video/x-raw, width=320, height=180
     ! watchdog timeout=5000
-    ! jpegenc
+    ! jpegenc name=enc
     ! appsink name=sink emit-signals=true drop=true max-buffers=1
     """)
 
@@ -35,7 +45,7 @@ async def preview_pipeline(host, port, source, broadcaster, gst_pipelines):
     completion = get_running_loop().create_future()
     bus = pipeline.bus
     bus.add_signal_watch()
-    bus.connect('message', gst_message, completion, source)
+    bus.connect('message', gst_message, completion, source, broadcaster)
 
     pipeline.set_state(Gst.State.PLAYING)
     log.info('Started preview pipeline for %s', source)
@@ -56,16 +66,28 @@ def stream_ended(completion, result):
 # GLib thread, below
 
 
-def gst_message(bus, message, completion, source):
+def gst_message(bus, message, completion, source, broadcaster):
     """GLib thread callback: GstBus message
 
     Report stream completion, if the message is fatal
     """
     type_ = message.type
+    loop = completion.get_loop()
     if type_ in (Gst.MessageType.EOS, Gst.MessageType.ERROR):
         log.error('Received %s from %s preview pipeline', type_, source)
-        loop = completion.get_loop()
         loop.call_soon_threadsafe(stream_ended, completion, type_)
+    elif type_ == Gst.MessageType.ELEMENT and message.has_name('level'):
+        structure = message.get_structure()
+        if structure is None:
+            return
+        loop.call_soon_threadsafe(
+            broadcaster.broadcast, {
+                'type': 'preview_audio_level',
+                'source': source,
+                'rms': structure.get_value('rms')[0],
+                'peak': structure.get_value('peak')[0],
+                'decay': structure.get_value('decay')[0],
+            })
 
 
 def new_sample(sink, source, broadcaster, loop):
