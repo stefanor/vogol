@@ -69,17 +69,19 @@ div.preview {
   margin: 0.5rem;
 }
 
-img.room {
+div.preview img.room {
   width: 320px;
 }
-.room {
+
+div.preview img.source {
+  width: 240px;
+}
+
+div.preview .room {
   height: 180px;
 }
 
-img.source {
-  width: 240px;
-}
-.source {
+div.preview .source {
   height: 135px;
 }
 
