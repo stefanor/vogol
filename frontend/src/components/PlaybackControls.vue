@@ -82,7 +82,18 @@ export default {
       this.$store.dispatch('refresh_files');
     },
     stop() {
-      this.$store.dispatch('playback_action', {action: 'stop'});
+      this.$bvModal
+        .msgBoxConfirm('Are you sure you want to stop playback?', {
+          title: 'Confirm stop',
+          headerBgVariant: 'danger',
+          okTitle: 'STOP Playback',
+          okVariant: 'danger',
+        })
+        .then(value => {
+          if (value) {
+            this.$store.dispatch('playback_action', {action: 'stop'});
+          }
+        });
     },
   },
 };
