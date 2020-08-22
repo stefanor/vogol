@@ -88,7 +88,7 @@ const actions = {
           rms: body.rms,
           peak: body.peak,
           decay: body.decay,
-        })
+        });
         break;
       case 'voctomix_state':
         commit('voctomix_state_update', body.state);

@@ -6,8 +6,8 @@
     />
     <div class="audio-level-bg" v-bind:class="{room: isRoom, source: isSource}">
       <div class="vu-wrapper" v-bind:class="{room: isRoom, source: isSource}">
-        <div class="vu-rms" v-bind:style="{height: audio_rms + '%' }"></div>
-        <div class="vu-peak" v-bind:style="{top: audio_peak + '%' }"></div>
+        <div class="vu-rms" v-bind:style="{height: audio_rms + '%'}"></div>
+        <div class="vu-peak" v-bind:style="{top: audio_peak + '%'}"></div>
       </div>
     </div>
   </div>
@@ -32,14 +32,14 @@ export default {
       const level = state.previews.audio_levels[this.room];
       if (level) {
         const db = level.peak;
-        return 100 - 10**(db / 20) * 80;
+        return 100 - 10 ** (db / 20) * 80;
       }
     },
     audio_rms(state) {
       const level = state.previews.audio_levels[this.room];
       if (level) {
         const db = level.rms;
-        return 100 - 10**(db / 20) * 80;
+        return 100 - 10 ** (db / 20) * 80;
       }
     },
     preview(state) {
@@ -93,8 +93,14 @@ img.stale {
 
 div.audio-level-bg {
   display: block;
-  background: rgb(0,1,232);
-  background: linear-gradient(0deg, rgba(0,1,232,1) 0%, rgba(0,105,75,1) 80%, rgba(0,255,33,1) 90%, rgba(255,0,0,1) 100%);
+  background: rgb(0, 1, 232);
+  background: linear-gradient(
+    0deg,
+    rgba(0, 1, 232, 1) 0%,
+    rgba(0, 105, 75, 1) 80%,
+    rgba(0, 255, 33, 1) 90%,
+    rgba(255, 0, 0, 1) 100%
+  );
   width: 10px;
 }
 
@@ -117,5 +123,4 @@ div.vu-peak {
   width: 100%;
   height: 2px;
 }
-
 </style>
