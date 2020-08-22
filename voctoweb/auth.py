@@ -93,6 +93,11 @@ async def login_complete(request):
             raise Exception('Failed to retrieve UserInfo')
         userinfo = await r.json()
 
+    if 'salsa_group' in config:
+        if config['salsa_group'] not in userinfo['groups']:
+            raise web.HTTPForbidden(reason='Access Denied. Not a member of '
+                                    + config["salsa_group"])
+
     session = request['session']
     session['userinfo'] = userinfo
     salsa_username = userinfo['nickname']
