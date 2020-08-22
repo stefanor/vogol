@@ -27,10 +27,10 @@
       <VideoPreview v-bind:room="source" />
       <button
         class="btn source-a"
-        v-bind:disabled="is_fullscreen"
-        v-on:click="fullscreen"
+        v-bind:disabled="is_fullscreen_solo"
+        v-on:click="fullscreen_solo"
       >
-        Fullscreen
+        Fullscreen Solo
       </button>
       <br />
       <AudioControl v-bind:source="source" />
@@ -52,8 +52,23 @@ export default {
     VideoPreview,
   },
   computed: mapState({
-    is_fullscreen(state) {
-      return state.voctomix.composite_mode == 'fullscreen' && this.source_a;
+    is_fullscreen_solo(state) {
+      if (state.voctomix.composite_mode == 'fullscreen' && this.source_a) {
+        for (const [source, level] of Object.entries(state.voctomix.audio)) {
+          if (this.source == source) {
+            if (level < 0.2) {
+              return false;
+            }
+          } else {
+            if (level > 0.2) {
+              return false;
+            }
+          }
+        }
+        return true;
+      } else {
+        return false;
+      }
     },
     title() {
       return startCase(this.source);
@@ -66,8 +81,8 @@ export default {
     },
   }),
   methods: {
-    fullscreen() {
-      this.send('fullscreen');
+    fullscreen_solo() {
+      this.$store.dispatch('fullscreen_solo', this.source);
     },
     on_key_down(ev) {
       const source_number = this.index + 1;
@@ -80,7 +95,7 @@ export default {
           this.set_b();
         } else if (!ev.ctrlKey && ev.altKey) {
           ev.preventDefault();
-          this.fullscreen();
+          this.fullscreen_solo();
         }
       }
     },

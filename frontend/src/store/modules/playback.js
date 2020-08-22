@@ -44,6 +44,22 @@ const actions = {
             },
           });
         }
+        for (const [source, level] of Object.entries(
+          rootState.voctomix.audio
+        )) {
+          if (source == 'recording') {
+            continue;
+          }
+          if (level > 0.2) {
+            dispatch('send_action', {
+              type: 'voctomix',
+              action: {
+                action: 'mute',
+                source: source,
+              },
+            });
+          }
+        }
       }
     }
     dispatch('send_action', {type: 'player', action});
