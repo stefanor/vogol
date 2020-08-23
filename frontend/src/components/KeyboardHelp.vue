@@ -1,5 +1,5 @@
 <template>
-  <b-modal title="Keboard Shortcuts" id="keyboard-shortcuts" ok-only>
+  <b-modal title="Keyboard Shortcuts" id="keyboard-shortcuts" ok-only>
     <table>
       <tr>
         <th>
