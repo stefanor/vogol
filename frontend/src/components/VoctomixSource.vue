@@ -62,7 +62,7 @@ export default {
   },
   data: () => ({
     // TODO: Make configurable somewhere
-    'video_only_sources': ['grabber'],
+    video_only_sources: ['grabber'],
   }),
   computed: mapState({
     is_fullscreen(state) {
