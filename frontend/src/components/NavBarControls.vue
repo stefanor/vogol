@@ -12,7 +12,7 @@
       v-bind:disabled="loop"
       v-on:click="stream_loop"
     >
-      Loop
+      Maintenance Loop
     </button>
     <button
       v-for="layout in layouts"
