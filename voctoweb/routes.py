@@ -67,6 +67,14 @@ async def websocket_handler(request):
                 log.info('WS message from %i (%s): %r', wsid, username, body)
                 type_ = body['type']
                 action = body['action']
+                broadcaster.broadcast({
+                    'type': 'user_action',
+                    'user_action': {
+                        'username': username,
+                        'type': type_,
+                        'action': action,
+                    },
+                })
                 r = None
                 if type_ == 'voctomix':
                     r = await wait_for(voctomix.action(**action), timeout=1)

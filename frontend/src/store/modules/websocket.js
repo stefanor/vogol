@@ -96,6 +96,9 @@ const actions = {
       case 'username':
         commit('users_logged_in', body.username);
         break;
+      case 'user_action':
+        commit('user_action', body.user_action);
+        break;
     }
     commit('state_updated');
   },
