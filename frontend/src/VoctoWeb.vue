@@ -49,6 +49,7 @@
         </span>
       </div>
     </footer>
+    <KeyboardHelp />
     <b-modal
       title="Not Logged In"
       ok-title="Login"
@@ -71,6 +72,7 @@ import {AlertPlugin, NavbarPlugin, ModalPlugin} from 'bootstrap-vue';
 import {mapState} from 'vuex';
 
 import ConnectedUsers from './components/ConnectedUsers.vue';
+import KeyboardHelp from './components/KeyboardHelp.vue';
 import NavBarControls from './components/NavBarControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
 import RoomPreview from './components/RoomPreview.vue';
@@ -85,6 +87,7 @@ export default {
   name: 'VoctoWeb',
   components: {
     ConnectedUsers,
+    KeyboardHelp,
     NavBarControls,
     PlaybackControls,
     RoomPreview,
