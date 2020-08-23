@@ -83,12 +83,16 @@ export default {
     },
     stop() {
       this.$bvModal
-        .msgBoxConfirm('Are you sure you want to stop playback?', {
-          title: 'Confirm stop',
-          headerBgVariant: 'danger',
-          okTitle: 'STOP Playback',
-          okVariant: 'danger',
-        })
+        .msgBoxConfirm(
+          'Are you sure you want to stop playback? ' +
+            'You will only be able to restart it from the beginning.',
+          {
+            title: 'Confirm stop',
+            headerBgVariant: 'danger',
+            okTitle: 'STOP Playback',
+            okVariant: 'danger',
+          }
+        )
         .then(value => {
           if (value) {
             this.$store.dispatch('playback_action', {action: 'stop'});
