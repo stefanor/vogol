@@ -3,7 +3,7 @@
     <div class="volume">
       <b-popover
         v-bind:target="'volume-badge-' + source"
-        triggers="hover"
+        triggers="click"
         placement="top"
         title="Fader (dB)"
       >
