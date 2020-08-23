@@ -1,10 +1,10 @@
 <template>
-  <div class="card">
+  <div class="card connected-users">
     <div class="card-header">Logged in as {{ username }}</div>
     <ul class="list-group list-group-flush">
       <li class="list-group-item">Online: {{ connected_users.join(', ') }}</li>
       <li
-        class="list-group-item"
+        class="list-group-item actions"
         v-for="(actions, bunch_index) in recent_actions"
         v-bind:key="bunch_index"
       >
@@ -42,3 +42,11 @@ export default {
   }),
 };
 </script>
+
+<style>
+.connected-users li.actions {
+  max-width: 50rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>
