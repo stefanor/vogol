@@ -42,7 +42,7 @@
         Fullscreen Solo
       </button>
       <br />
-      <AudioControl v-bind:source="source" />
+      <AudioControl v-bind:source="source" v-if="!is_video_only" />
     </div>
   </div>
 </template>
