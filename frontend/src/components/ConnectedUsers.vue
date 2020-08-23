@@ -19,8 +19,14 @@
           v-for="(action, action_index) in actions.actions"
           v-bind:key="action_index"
           v-bind:title="JSON.stringify(action.action)"
-          >{{ action.action.action }}</span
         >
+          <span v-if="action.action.source">
+            {{ action.action.action }}: {{ action.action.source }}
+          </span>
+          <span v-else>
+            {{ action.action.action }}
+          </span>
+        </span>
       </li>
     </ul>
   </div>
