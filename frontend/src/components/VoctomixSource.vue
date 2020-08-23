@@ -29,6 +29,7 @@
         class="btn source-a"
         v-bind:disabled="is_fullscreen"
         v-on:click="fullscreen"
+        v-if="is_video_only"
       >
         Fullscreen
       </button>
@@ -36,6 +37,7 @@
         class="btn source-a"
         v-bind:disabled="is_fullscreen_solo"
         v-on:click="fullscreen_solo"
+        v-if="!is_video_only"
       >
         Fullscreen Solo
       </button>
@@ -58,6 +60,10 @@ export default {
     AudioControl,
     VideoPreview,
   },
+  data: () => ({
+    // TODO: Make configurable somewhere
+    'video_only_sources': ['grabber'],
+  }),
   computed: mapState({
     is_fullscreen(state) {
       return state.voctomix.composite_mode == 'fullscreen' && this.source_a;
@@ -79,6 +85,9 @@ export default {
       } else {
         return false;
       }
+    },
+    is_video_only() {
+      return this.video_only_sources.indexOf(this.source) !== -1;
     },
     title() {
       return startCase(this.source);
@@ -108,7 +117,11 @@ export default {
           this.set_b();
         } else if (!ev.ctrlKey && ev.altKey) {
           ev.preventDefault();
-          this.fullscreen_solo();
+          if (this.is_video_only) {
+            this.fullscreen();
+          } else {
+            this.fullscreen_solo();
+          }
         }
       }
     },
