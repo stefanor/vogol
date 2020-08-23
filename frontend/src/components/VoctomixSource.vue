@@ -27,6 +27,13 @@
       <VideoPreview v-bind:room="source" />
       <button
         class="btn source-a"
+        v-bind:disabled="is_fullscreen"
+        v-on:click="fullscreen"
+      >
+        Fullscreen
+      </button>
+      <button
+        class="btn source-a"
         v-bind:disabled="is_fullscreen_solo"
         v-on:click="fullscreen_solo"
       >
@@ -52,6 +59,9 @@ export default {
     VideoPreview,
   },
   computed: mapState({
+    is_fullscreen(state) {
+      return state.voctomix.composite_mode == 'fullscreen' && this.source_a;
+    },
     is_fullscreen_solo(state) {
       if (state.voctomix.composite_mode == 'fullscreen' && this.source_a) {
         for (const [source, level] of Object.entries(state.voctomix.audio)) {
@@ -81,6 +91,9 @@ export default {
     },
   }),
   methods: {
+    fullscreen() {
+      this.send('fullscreen');
+    },
     fullscreen_solo() {
       this.$store.dispatch('fullscreen_solo', this.source);
     },
