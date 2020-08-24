@@ -6,8 +6,8 @@
           <span class="badge badge-light">1</span>
         </th>
         <td>
-          Make the first source from the left
-          <span class="badge source-a">A</span>.
+          Fullscreen or Fullscreen Solo the first source from the left,
+          as appropriate.
         </td>
       </tr>
       <tr>
@@ -15,8 +15,8 @@
           <span class="badge badge-light">2</span>
         </th>
         <td>
-          Make the second source from the left
-          <span class="badge source-a">A</span>.
+          Fullscreen or Fullscreen Solo the second source from the left,
+          as appropriate.
         </td>
       </tr>
       <tr>
@@ -26,14 +26,6 @@
         <td>
           Make the first source from the left
           <span class="badge source-b">B</span>.
-        </td>
-      </tr>
-      <tr>
-        <th>
-          <span class="badge badge-light">Alt+1</span>
-        </th>
-        <td>
-          Display the first source from the left Full Screen.
         </td>
       </tr>
       <tr>
