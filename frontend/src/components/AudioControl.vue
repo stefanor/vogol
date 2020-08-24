@@ -3,7 +3,7 @@
     <div class="volume">
       <b-popover
         v-bind:target="'volume-badge-' + source"
-        triggers="click"
+        triggers="focus"
         placement="top"
         title="Fader (dB)"
       >
@@ -16,6 +16,7 @@
         ></b-form-input>
       </b-popover>
       <div
+        tabindex="0"
         class="badge badge-info"
         v-bind:id="'volume-badge-' + source"
         v-bind:class="[muted ? 'badge-danger' : 'badge-success']"
