@@ -108,20 +108,17 @@ export default {
     },
     on_key_down(ev) {
       const source_number = this.index + 1;
-      if (ev.key == source_number && !ev.shiftKey) {
-        if (!ev.ctrlKey && !ev.altKey) {
-          ev.preventDefault();
-          this.set_a();
-        } else if (ev.ctrlKey && !ev.altKey) {
-          ev.preventDefault();
-          this.set_b();
-        } else if (!ev.ctrlKey && ev.altKey) {
+      if (ev.key == source_number && !ev.shiftKey && !ev.altKey) {
+        if (!ev.ctrlKey) {
           ev.preventDefault();
           if (this.is_video_only) {
             this.fullscreen();
           } else {
             this.fullscreen_solo();
           }
+        } else {
+          ev.preventDefault();
+          this.set_b();
         }
       }
     },
