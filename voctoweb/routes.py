@@ -44,6 +44,15 @@ async def websocket_handler(request):
     log.info('WebSocket connection %i (%s) opened', wsid, username)
 
     await ws.send_json({
+        'type': 'config',
+        'config': {
+            'video_only_sources': [
+                source.strip() for source
+                in app['config'].get('video_only_sources').split(',')
+                if source.strip()]
+        },
+    })
+    await ws.send_json({
         'type': 'voctomix_state',
         'state': voctomix.state,
     })

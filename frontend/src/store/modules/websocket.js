@@ -67,6 +67,9 @@ const actions = {
 
   ws_message_deserialized({commit}, body) {
     switch (body.type) {
+      case 'config':
+        commit('voctomix_config', body.config);
+        break;
       case 'connected_users':
         commit('users_update', body.users);
         break;
