@@ -8,6 +8,7 @@ from typing import List, Optional
 class Config:
     host: str
     require_salsa_auth: bool
+    room_name: str
     salsa_client_id: Optional[str]
     salsa_client_secret: Optional[str]
     salsa_group: Optional[List[str]]
@@ -29,6 +30,7 @@ def parse_config(config_file):
         host=voctoweb['host'],
         require_salsa_auth=voctoweb.getboolean('require_salsa_auth'),
         recordings=Path(voctoweb['recordings']),
+        room_name=voctoweb['room_name'],
         salsa_client_id=voctoweb.get('salsa_client_id'),
         salsa_client_secret=voctoweb.get('salsa_client_secret'),
         salsa_group=voctoweb.get('salsa_group'),

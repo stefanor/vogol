@@ -2,6 +2,7 @@ import {deserialize} from 'bson';
 
 const state = () => ({
   connection: 'disconnected',
+  room_name: null,
   state_last_updated: null,
   ws: null,
 });
@@ -28,6 +29,10 @@ const mutations = {
 
   state_updated(state) {
     state.state_last_updated = new Date();
+  },
+
+  websocket_config(state, config) {
+    state.room_name = config.room_name;
   },
 };
 
@@ -70,6 +75,7 @@ const actions = {
       case 'config':
         commit('user_config', body.config);
         commit('voctomix_config', body.config);
+        commit('websocket_config', body.config);
         break;
       case 'connected_users':
         commit('users_update', body.users);

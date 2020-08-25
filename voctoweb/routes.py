@@ -47,6 +47,7 @@ async def websocket_handler(request):
     await ws.send_json({
         'type': 'config',
         'config': {
+            'room_name': config.room_name,
             'username': username,
             'video_only_sources': config.video_only_sources,
         },

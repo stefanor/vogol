@@ -7,7 +7,7 @@
     >
       <b-navbar-brand href="#">
         <img v-bind:src="voctoweb_logo" id="nav-logo" />
-        VoctoWeb
+        VoctoWeb: {{ room_name }}
       </b-navbar-brand>
       <NavBarControls />
     </b-navbar>
@@ -103,6 +103,7 @@ export default {
     disconnected: state => !state.voctomix.connected,
     last_update: state => state.websocket.state_last_updated,
     logged_out: state => state.websocket.connection == 'logged_out',
+    room_name: state => state.websocket.room_name,
     sources: state => state.voctomix.sources,
   }),
   methods: {
@@ -116,6 +117,11 @@ export default {
   },
   created() {
     this.$store.dispatch('connect');
+  },
+  watch: {
+    room_name(room_name) {
+      document.title = 'VoctoWeb: ' + room_name;
+    },
   },
 };
 </script>
