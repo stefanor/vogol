@@ -47,6 +47,7 @@ async def websocket_handler(request):
     await ws.send_json({
         'type': 'config',
         'config': {
+            'username': username,
             'video_only_sources': config.video_only_sources,
         },
     })
@@ -61,10 +62,6 @@ async def websocket_handler(request):
     await ws.send_json({
         'type': 'player_files',
         'files': player.list_files(),
-    })
-    await ws.send_json({
-        'type': 'username',
-        'username': username,
     })
 
     try:
