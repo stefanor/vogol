@@ -10,7 +10,7 @@ from voctoweb.broadcaster import WSBroadcaster
 
 async def app_factory(config):
     middlewares = [session_middleware]
-    if config.getboolean('require_salsa_auth'):
+    if config.require_salsa_auth:
         middlewares.append(auth_middleware)
     app = web.Application(middlewares=middlewares)
     app.add_routes(routes)

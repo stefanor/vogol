@@ -244,7 +244,7 @@ async def connect_voctomix(app):
     """Connect to voctomix, find out what's there, start the preview clients"""
     config = app['config']
     voctomix = Voctomix(
-        host=config['host'],
+        host=config.host,
         broadcaster=app['broadcaster'],
         gst_pipelines=app['gst']['pipelines'])
     await voctomix.connect(reconnect_on_error=True)

@@ -1,6 +1,5 @@
 import logging
 from asyncio import create_task, get_running_loop, sleep
-from pathlib import Path
 
 from voctoweb.gst import Gst, GstPbutils, stop_pipeline
 
@@ -10,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class VideoPlayer:
     def __init__(self, base_dir, broadcaster, voctomix, source_name):
-        self.base_dir = Path(base_dir)
+        self.base_dir = base_dir
         self.broadcaster = broadcaster
         self.voctomix = voctomix
         self.source_name = source_name
@@ -131,7 +130,7 @@ async def initialize_player(app):
     """Initialize the video player"""
     config = app['config']
     player = VideoPlayer(
-        base_dir=config['recordings'],
+        base_dir=config.recordings,
         broadcaster=app['broadcaster'],
         voctomix=app['voctomix'],
         source_name='recording')

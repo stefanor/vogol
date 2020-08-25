@@ -33,6 +33,7 @@ async def static(request):
 @require_login
 async def websocket_handler(request):
     app = request.app
+    config = app['config']
     broadcaster = app['broadcaster']
     player = request.app['player']
     voctomix = request.app['voctomix']
@@ -46,10 +47,7 @@ async def websocket_handler(request):
     await ws.send_json({
         'type': 'config',
         'config': {
-            'video_only_sources': [
-                source.strip() for source
-                in app['config'].get('video_only_sources').split(',')
-                if source.strip()]
+            'video_only_sources': config.video_only_sources,
         },
     })
     await ws.send_json({
