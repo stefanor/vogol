@@ -6,8 +6,8 @@
           <span class="badge badge-light">1</span>
         </th>
         <td>
-          Fullscreen or Fullscreen Solo the first source from the left,
-          as appropriate.
+          Fullscreen or Fullscreen Solo the first source from the left, as
+          appropriate.
         </td>
       </tr>
       <tr>
@@ -15,8 +15,8 @@
           <span class="badge badge-light">2</span>
         </th>
         <td>
-          Fullscreen or Fullscreen Solo the second source from the left,
-          as appropriate.
+          Fullscreen or Fullscreen Solo the second source from the left, as
+          appropriate.
         </td>
       </tr>
       <tr>
