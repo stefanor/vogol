@@ -8,8 +8,8 @@ log = logging.getLogger(__name__)
 
 
 class VideoPlayer:
-    def __init__(self, base_dir, broadcaster, voctomix, source_name):
-        self.base_dir = base_dir
+    def __init__(self, config, broadcaster, voctomix, source_name):
+        self.config = config
         self.broadcaster = broadcaster
         self.voctomix = voctomix
         self.source_name = source_name
@@ -22,10 +22,11 @@ class VideoPlayer:
         self.playback_future = None
 
     def list_files(self):
+        base_dir = self.config.recordings
         files = []
         for extension in ('mp4', 'webm', 'mkv'):
-            files.extend(self.base_dir.glob(f'*.{extension}'))
-        files = [str(file_.relative_to(self.base_dir)) for file_ in files]
+            files.extend(base_dir.glob(f'*.{extension}'))
+        files = [str(file_.relative_to(base_dir)) for file_ in files]
         files.sort()
         return files
 
@@ -61,7 +62,7 @@ class VideoPlayer:
         if self.playback != 'stopped':
             raise Exception(f'Can not change file while {self.playback}')
 
-        path = self.base_dir / filename
+        path = self.config.recordings / filename
         if not path.exists():
             raise Exception('Unknown file {filename}')
 
@@ -78,7 +79,7 @@ class VideoPlayer:
             raise Exception('No file selected to play')
 
 
-        path = self.base_dir / self.file
+        path = self.config.recordings / self.file
         host = self.voctomix.host
         port = self.voctomix.source_port(self.source_name)
         videocaps = self.voctomix.mix_videocaps
@@ -131,7 +132,7 @@ async def initialize_player(app):
     """Initialize the video player"""
     config = app['config']
     player = VideoPlayer(
-        base_dir=config.recordings,
+        config=config,
         broadcaster=app['broadcaster'],
         voctomix=app['voctomix'],
         source_name='recording')
