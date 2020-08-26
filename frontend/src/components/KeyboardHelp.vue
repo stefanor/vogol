@@ -65,7 +65,7 @@
           <span class="badge badge-light">F11</span>
         </th>
         <td>
-          Stream Live.
+          Stream the maintenance loop.
         </td>
       </tr>
       <tr>
@@ -73,7 +73,7 @@
           <span class="badge badge-light">F12</span>
         </th>
         <td>
-          Stream the maintenance loop.
+          Stream Live.
         </td>
       </tr>
     </table>
