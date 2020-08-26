@@ -30,8 +30,8 @@ const mutations = {
       state.recent_actions.shift();
     }
   },
-  users_logged_in(state, username) {
-    state.username = username;
+  user_config(state, config) {
+    state.username = config.username;
   },
 };
 

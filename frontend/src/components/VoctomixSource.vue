@@ -60,10 +60,6 @@ export default {
     AudioControl,
     VideoPreview,
   },
-  data: () => ({
-    // TODO: Make configurable somewhere
-    video_only_sources: ['grabber'],
-  }),
   computed: mapState({
     is_fullscreen(state) {
       return state.voctomix.composite_mode == 'fullscreen' && this.source_a;
@@ -86,8 +82,8 @@ export default {
         return false;
       }
     },
-    is_video_only() {
-      return this.video_only_sources.indexOf(this.source) !== -1;
+    is_video_only(state) {
+      return state.voctomix.video_only_sources.indexOf(this.source) !== -1;
     },
     title() {
       return startCase(this.source);
@@ -104,7 +100,7 @@ export default {
       this.send('fullscreen');
     },
     fullscreen_solo() {
-      this.$store.dispatch('fullscreen_solo', this.source);
+      this.send('fullscreen_solo');
     },
     on_key_down(ev) {
       const source_number = this.index + 1;

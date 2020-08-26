@@ -12,8 +12,12 @@
         </button>
       </li>
       <li class="list-group-item" v-if="file">Selected: {{ file }}</li>
-      <li class="list-group-item" v-if="position">Position: {{ position }}</li>
-      <li class="list-group-item" v-if="duration">Duration: {{ duration }}</li>
+      <li class="list-group-item" v-if="position">
+        Position: {{ position }} / {{ duration }}
+      </li>
+      <li class="list-group-item" v-else-if="duration">
+        Duration: {{ duration }}
+      </li>
       <li class="list-group-item" v-if="playing">
         <button class="btn btn-danger" v-on:click="stop">
           <b-icon-stop-fill /> Stop
@@ -24,7 +28,23 @@
           <b-icon-play-fill /> Play
         </button>
       </li>
+      <li class="list-group-item" v-if="playing">
+        After Playback:
+        <select v-model="after_playback">
+          <option value="null">Do Nothing, black screen</option>
+          <option v-for="source in sources" v-bind:key="source" v-bind:value="JSON.stringify({source})"
+            >Source: {{ source }}</option
+          >
+          <option
+            v-for="(preset, preset_id) in presets"
+            v-bind:key="preset_id"
+            v-bind:value="JSON.stringify({preset: preset_id})"
+            >Preset: {{ preset.name }}</option
+          >
+        </select>
+      </li>
     </ul>
+
     <b-modal
       title="Select File"
       id="playback-file-modal"
@@ -49,7 +69,6 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
 import {BFormRadio, BIconPlayFill, BIconStopFill, BModal} from 'bootstrap-vue';
 
 export default {
@@ -62,14 +81,41 @@ export default {
     BIconStopFill,
     BModal,
   },
-  computed: mapState({
-    duration: state => state.playback.duration,
-    file: state => state.playback.file,
-    files: state => state.playback.files,
-    playing: state => state.playback.playback == 'playing',
-    position: state => state.playback.position,
-    stopped: state => state.playback.playback == 'stopped',
-  }),
+  computed: {
+    after_playback: {
+      get() {
+        return JSON.stringify(this.$store.state.playback.after_playback);
+      },
+      set(value) {
+        const after_playback = JSON.parse(value);
+        this.$store.dispatch('playback_action', {action: 'after_playback', after_playback});
+      },
+    },
+    duration() {
+      return this.$store.state.playback.duration;
+    },
+    file() {
+      return this.$store.state.playback.file;
+    },
+    files() {
+      return this.$store.state.playback.files;
+    },
+    playing() {
+      return this.$store.state.playback.playback == 'playing';
+    },
+    position() {
+      return this.$store.state.playback.position;
+    },
+    presets() {
+      return this.$store.state.presets.presets;
+    },
+    sources() {
+      return this.$store.state.voctomix.sources;
+    },
+    stopped() {
+      return this.$store.state.playback.playback == 'stopped';
+    },
+  },
   methods: {
     load_file() {
       const file = this.selected_file;

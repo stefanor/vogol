@@ -1,6 +1,5 @@
 import logging
 from asyncio import create_task, get_running_loop, sleep
-from pathlib import Path
 
 from voctoweb.gst import Gst, GstPbutils, stop_pipeline
 
@@ -9,12 +8,13 @@ log = logging.getLogger(__name__)
 
 
 class VideoPlayer:
-    def __init__(self, base_dir, broadcaster, voctomix, source_name):
-        self.base_dir = Path(base_dir)
+    def __init__(self, config, broadcaster, voctomix, source_name):
+        self.config = config
         self.broadcaster = broadcaster
         self.voctomix = voctomix
         self.source_name = source_name
 
+        self.after_playback = None
         self.file = None
         self.duration = None
         self.position = None
@@ -23,10 +23,11 @@ class VideoPlayer:
         self.playback_future = None
 
     def list_files(self):
+        base_dir = self.config.recordings
         files = []
         for extension in ('mp4', 'webm', 'mkv'):
-            files.extend(self.base_dir.glob(f'*.{extension}'))
-        files = [str(file_.relative_to(self.base_dir)) for file_ in files]
+            files.extend(base_dir.glob(f'*.{extension}'))
+        files = [str(file_.relative_to(base_dir)) for file_ in files]
         files.sort()
         return files
 
@@ -39,14 +40,18 @@ class VideoPlayer:
     @property
     def state(self):
         return {
+            'after_playback': self.after_playback,
             'file': self.file,
             'duration': self.duration,
             'playback': self.playback,
             'position': self.position,
         }
 
-    async def action(self, action=None, file=None):
-        if action == 'load':
+    async def action(self, action=None, file=None, after_playback=None):
+        if action == 'after_playback':
+            self.after_playback = after_playback
+            await self.broadcast_state()
+        elif action == 'load':
             await self.load_file(file)
         elif action == 'play':
             await self.play()
@@ -62,7 +67,7 @@ class VideoPlayer:
         if self.playback != 'stopped':
             raise Exception(f'Can not change file while {self.playback}')
 
-        path = self.base_dir / filename
+        path = self.config.recordings / filename
         if not path.exists():
             raise Exception('Unknown file {filename}')
 
@@ -79,7 +84,7 @@ class VideoPlayer:
             raise Exception('No file selected to play')
 
 
-        path = self.base_dir / self.file
+        path = self.config.recordings / self.file
         host = self.voctomix.host
         port = self.voctomix.source_port(self.source_name)
         videocaps = self.voctomix.mix_videocaps
@@ -102,6 +107,16 @@ class VideoPlayer:
         if self.playback_pipeline:
             await stop_pipeline(self.playback_pipeline)
             self.plyaback_pipeline = None
+        if self.after_playback:
+            if 'source' in self.after_playback:
+                source = self.after_playback['source']
+                if source in self.config.video_only_sources:
+                    await self.voctomix.action('fullscreen', source=source)
+                else:
+                    await self.voctomix.action('fullscreen_solo', source=source)
+            elif 'preset' in self.after_playback:
+                preset = self.after_playback['preset']
+                await self.voctomix.action('preset', preset=preset)
 
     async def monitor_playback(self):
         """Monitor playback, updating self.{playback,position}"""
@@ -132,7 +147,7 @@ async def initialize_player(app):
     """Initialize the video player"""
     config = app['config']
     player = VideoPlayer(
-        base_dir=config['recordings'],
+        config=config,
         broadcaster=app['broadcaster'],
         voctomix=app['voctomix'],
         source_name='recording')

@@ -1,4 +1,5 @@
 const state = () => ({
+  after_playback: null,
   duration: self.duration,
   file: null,
   files: [],
@@ -23,43 +24,7 @@ const actions = {
       if (voctomix.sources.indexOf('recording') == -1) {
         console.log("No recording source, can't control it");
       } else {
-        if (
-          voctomix.composite_mode != 'fullscreen' ||
-          voctomix.video_a != 'recording'
-        ) {
-          dispatch('send_action', {
-            type: 'voctomix',
-            action: {
-              action: 'fullscreen',
-              source: 'recording',
-            },
-          });
-        }
-        if (rootState.voctomix.audio.recording < 0.2) {
-          dispatch('send_action', {
-            type: 'voctomix',
-            action: {
-              action: 'unmute',
-              source: 'recording',
-            },
-          });
-        }
-        for (const [source, level] of Object.entries(
-          rootState.voctomix.audio
-        )) {
-          if (source == 'recording') {
-            continue;
-          }
-          if (level > 0.2) {
-            dispatch('send_action', {
-              type: 'voctomix',
-              action: {
-                action: 'mute',
-                source: source,
-              },
-            });
-          }
-        }
+        dispatch('voctomix_action', {action: 'fullscreen_solo', source: 'recording'});
       }
     }
     dispatch('send_action', {type: 'player', action});

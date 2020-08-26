@@ -7,7 +7,7 @@
     >
       <b-navbar-brand href="#">
         <img v-bind:src="voctoweb_logo" id="nav-logo" />
-        VoctoWeb
+        VoctoWeb: {{ room_name }}
       </b-navbar-brand>
       <NavBarControls />
     </b-navbar>
@@ -28,6 +28,7 @@
       <div class="row">
         <RoomPreview />
         <PlaybackControls />
+        <PresetControls />
         <ConnectedUsers />
       </div>
       <div class="row">
@@ -75,6 +76,7 @@ import ConnectedUsers from './components/ConnectedUsers.vue';
 import KeyboardHelp from './components/KeyboardHelp.vue';
 import NavBarControls from './components/NavBarControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
+import PresetControls from './components/PresetControls.vue';
 import RoomPreview from './components/RoomPreview.vue';
 import VoctomixSource from './components/VoctomixSource.vue';
 import favicon_svg from './favicon/favicon.svg';
@@ -90,6 +92,7 @@ export default {
     KeyboardHelp,
     NavBarControls,
     PlaybackControls,
+    PresetControls,
     RoomPreview,
     VoctomixSource,
   },
@@ -103,6 +106,7 @@ export default {
     disconnected: state => !state.voctomix.connected,
     last_update: state => state.websocket.state_last_updated,
     logged_out: state => state.websocket.connection == 'logged_out',
+    room_name: state => state.websocket.room_name,
     sources: state => state.voctomix.sources,
   }),
   methods: {
@@ -116,6 +120,11 @@ export default {
   },
   created() {
     this.$store.dispatch('connect');
+  },
+  watch: {
+    room_name(room_name) {
+      document.title = 'VoctoWeb: ' + room_name;
+    },
   },
 };
 </script>

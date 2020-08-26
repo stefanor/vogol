@@ -1,5 +1,7 @@
 import logging
 from asyncio import wait_for
+from asyncio.exceptions import CancelledError
+from dataclasses import asdict
 
 from aiohttp import WSMsgType, hdrs, web
 
@@ -33,6 +35,7 @@ async def static(request):
 @require_login
 async def websocket_handler(request):
     app = request.app
+    config = app['config']
     broadcaster = app['broadcaster']
     player = request.app['player']
     voctomix = request.app['voctomix']
@@ -44,6 +47,16 @@ async def websocket_handler(request):
     log.info('WebSocket connection %i (%s) opened', wsid, username)
 
     await ws.send_json({
+        'type': 'config',
+        'config': {
+            'presets': {id_: asdict(preset)
+                        for id_, preset in config.presets.items()},
+            'room_name': config.room_name,
+            'username': username,
+            'video_only_sources': config.video_only_sources,
+        },
+    })
+    await ws.send_json({
         'type': 'voctomix_state',
         'state': voctomix.state,
     })
@@ -54,10 +67,6 @@ async def websocket_handler(request):
     await ws.send_json({
         'type': 'player_files',
         'files': player.list_files(),
-    })
-    await ws.send_json({
-        'type': 'username',
-        'username': username,
     })
 
     try:
@@ -90,6 +99,10 @@ async def websocket_handler(request):
             else:
                 log.error('Unknown WS message %r from %i (%s)',
                           body, wsid, username)
+    except CancelledError:
+        raise
+    except:
+        log.exception('WS %i (%s) failed', wsid, username)
     finally:
         log.info('WebSocket connection %i (%s) closed', wsid, username)
         broadcaster.remove_ws(username, wsid)

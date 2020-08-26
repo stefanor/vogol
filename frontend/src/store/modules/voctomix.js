@@ -6,47 +6,19 @@ const state = () => ({
   stream_status: null,
   video_a: null,
   video_b: null,
+  video_only_sources: [],
 });
 
 const mutations = {
   voctomix_state_update(state, incoming) {
     Object.assign(state, incoming);
   },
+  voctomix_config(state, config) {
+    state.video_only_sources = config.video_only_sources;
+  },
 };
 
 const actions = {
-  fullscreen_solo({dispatch, state}, source) {
-    dispatch('send_action', {
-      type: 'voctomix',
-      action: {
-        action: 'fullscreen',
-        source,
-      },
-    });
-    for (const [other_source, level] of Object.entries(state.audio)) {
-      if (source == other_source) {
-        if (level < 0.2) {
-          dispatch('send_action', {
-            type: 'voctomix',
-            action: {
-              action: 'unmute',
-              source: source,
-            },
-          });
-        }
-      } else {
-        if (level > 0.2) {
-          dispatch('send_action', {
-            type: 'voctomix',
-            action: {
-              action: 'mute',
-              source: other_source,
-            },
-          });
-        }
-      }
-    }
-  },
   voctomix_action({dispatch}, action) {
     dispatch('send_action', {type: 'voctomix', action});
   },

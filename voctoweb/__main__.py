@@ -1,10 +1,10 @@
 import argparse
-import configparser
 import logging
 
 from aiohttp import web
 
 from voctoweb.app import app_factory
+from voctoweb.config import parse_config
 
 
 def main():
@@ -16,11 +16,10 @@ def main():
                    help='Configuration file')
     args = p.parse_args()
 
-    config = configparser.ConfigParser()
-    config.read(args.config)
+    config = parse_config(args.config)
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-    app = app_factory(config['voctoweb'])
+    app = app_factory(config)
     web.run_app(app)
 
 
