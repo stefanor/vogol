@@ -101,7 +101,7 @@ class Voctomix:
                 if source == other_source and level < 0.2:
                     await send('set_audio_volume', source, '1')
                 if source != other_source and level > 0.2:
-                    await send('set_audio_volume', source, '0')
+                    await send('set_audio_volume', other_source, '0')
         elif action == 'preset':
             preset_def = self.presets[preset]
             await send('set_video_a', preset_def.video_a)
