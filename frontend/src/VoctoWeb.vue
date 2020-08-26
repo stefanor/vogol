@@ -28,6 +28,7 @@
       <div class="row">
         <RoomPreview />
         <PlaybackControls />
+        <PresetControls />
         <ConnectedUsers />
       </div>
       <div class="row">
@@ -75,6 +76,7 @@ import ConnectedUsers from './components/ConnectedUsers.vue';
 import KeyboardHelp from './components/KeyboardHelp.vue';
 import NavBarControls from './components/NavBarControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
+import PresetControls from './components/PresetControls.vue';
 import RoomPreview from './components/RoomPreview.vue';
 import VoctomixSource from './components/VoctomixSource.vue';
 import favicon_svg from './favicon/favicon.svg';
@@ -90,6 +92,7 @@ export default {
     KeyboardHelp,
     NavBarControls,
     PlaybackControls,
+    PresetControls,
     RoomPreview,
     VoctomixSource,
   },

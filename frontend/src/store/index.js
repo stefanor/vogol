@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 
 import errors from './modules/errors';
 import playback from './modules/playback';
+import presets from './modules/presets';
 import previews from './modules/previews';
 import users from './modules/users';
 import voctomix from './modules/voctomix';
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   modules: {
     errors,
     playback,
+    presets,
     previews,
     users,
     voctomix,

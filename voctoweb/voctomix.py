@@ -12,8 +12,9 @@ log = logging.getLogger(__name__)
 
 
 class Voctomix:
-    def __init__(self, host, broadcaster, gst_pipelines):
+    def __init__(self, host, presets, broadcaster, gst_pipelines):
         self.host = host
+        self.presets = presets
         self.control = VoctomixControl(host, self)
         self.preview_tasks = {}
         self.reconnection_task = None
@@ -86,12 +87,24 @@ class Voctomix:
     def mix_videocaps(self):
         return self.control.config['mix']['videocaps']
 
-    async def action(self, action, source=None, mode=None, volume=None):
+    async def action(self, action, source=None, mode=None, volume=None,
+                     preset=None):
         """Fire an action requested by the client"""
         send = self.control.send
         if action == 'fullscreen':
             await send('set_composite_mode', 'fullscreen')
             await send('set_video_a', source)
+        elif action == 'preset':
+            preset_def = self.presets[preset]
+            await send('set_video_a', preset_def.video_a)
+            if preset_def.video_b:
+                await send('set_video_b', preset_def.video_b)
+            await send('set_composite_mode', preset_def.composite_mode)
+            for source, level in self.state['audio'].items():
+                if source in preset_def.audio_solo and level < 0.2:
+                    await send('set_audio_volume', source, '1')
+                if source not in preset_def.audio_solo and level > 0.2:
+                    await send('set_audio_volume', source, '0')
         elif action == 'set_composite_mode':
             await send('set_composite_mode', mode)
         elif action =='set_a':
@@ -245,6 +258,7 @@ async def connect_voctomix(app):
     config = app['config']
     voctomix = Voctomix(
         host=config.host,
+        presets=config.presets,
         broadcaster=app['broadcaster'],
         gst_pipelines=app['gst']['pipelines'])
     await voctomix.connect(reconnect_on_error=True)

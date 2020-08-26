@@ -73,6 +73,7 @@ const actions = {
   ws_message_deserialized({commit}, body) {
     switch (body.type) {
       case 'config':
+        commit('presets_config', body.config);
         commit('user_config', body.config);
         commit('voctomix_config', body.config);
         commit('websocket_config', body.config);

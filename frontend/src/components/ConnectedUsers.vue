@@ -23,6 +23,9 @@
           <span v-if="action.action.source">
             {{ action.action.action }}: {{ action.action.source }}
           </span>
+          <span v-else-if="action.action.preset">
+            {{ action.action.action }}: {{ action.action.preset }}
+          </span>
           <span v-else>
             {{ action.action.action }}
           </span>

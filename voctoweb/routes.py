@@ -1,6 +1,7 @@
 import logging
 from asyncio import wait_for
 from asyncio.exceptions import CancelledError
+from dataclasses import asdict
 
 from aiohttp import WSMsgType, hdrs, web
 
@@ -48,6 +49,8 @@ async def websocket_handler(request):
     await ws.send_json({
         'type': 'config',
         'config': {
+            'presets': {id_: asdict(preset)
+                        for id_, preset in config.presets.items()},
             'room_name': config.room_name,
             'username': username,
             'video_only_sources': config.video_only_sources,
