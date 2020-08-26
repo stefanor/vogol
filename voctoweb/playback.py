@@ -14,6 +14,7 @@ class VideoPlayer:
         self.voctomix = voctomix
         self.source_name = source_name
 
+        self.after_playback = None
         self.file = None
         self.duration = None
         self.position = None
@@ -39,14 +40,18 @@ class VideoPlayer:
     @property
     def state(self):
         return {
+            'after_playback': self.after_playback,
             'file': self.file,
             'duration': self.duration,
             'playback': self.playback,
             'position': self.position,
         }
 
-    async def action(self, action=None, file=None):
-        if action == 'load':
+    async def action(self, action=None, file=None, after_playback=None):
+        if action == 'after_playback':
+            self.after_playback = after_playback
+            await self.broadcast_state()
+        elif action == 'load':
             await self.load_file(file)
         elif action == 'play':
             await self.play()
@@ -102,6 +107,16 @@ class VideoPlayer:
         if self.playback_pipeline:
             await stop_pipeline(self.playback_pipeline)
             self.plyaback_pipeline = None
+        if self.after_playback:
+            if 'source' in self.after_playback:
+                source = self.after_playback['source']
+                if source in self.config.video_only_sources:
+                    await self.voctomix.action('fullscreen', source=source)
+                else:
+                    await self.voctomix.action('fullscreen_solo', source=source)
+            elif 'preset' in self.after_playback:
+                preset = self.after_playback['preset']
+                await self.voctomix.action('preset', preset=preset)
 
     async def monitor_playback(self):
         """Monitor playback, updating self.{playback,position}"""

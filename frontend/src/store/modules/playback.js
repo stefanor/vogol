@@ -1,4 +1,5 @@
 const state = () => ({
+  after_playback: null,
   duration: self.duration,
   file: null,
   files: [],

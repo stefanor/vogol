@@ -28,7 +28,23 @@
           <b-icon-play-fill /> Play
         </button>
       </li>
+      <li class="list-group-item" v-if="playing">
+        After Playback:
+        <select v-model="after_playback">
+          <option value="null">Do Nothing, black screen</option>
+          <option v-for="source in sources" v-bind:key="source" v-bind:value="JSON.stringify({source})"
+            >Source: {{ source }}</option
+          >
+          <option
+            v-for="(preset, preset_id) in presets"
+            v-bind:key="preset_id"
+            v-bind:value="JSON.stringify({preset: preset_id})"
+            >Preset: {{ preset.name }}</option
+          >
+        </select>
+      </li>
     </ul>
+
     <b-modal
       title="Select File"
       id="playback-file-modal"
@@ -66,6 +82,15 @@ export default {
     BModal,
   },
   computed: {
+    after_playback: {
+      get() {
+        return JSON.stringify(this.$store.state.playback.after_playback);
+      },
+      set(value) {
+        const after_playback = JSON.parse(value);
+        this.$store.dispatch('playback_action', {action: 'after_playback', after_playback});
+      },
+    },
     duration() {
       return this.$store.state.playback.duration;
     },
@@ -80,6 +105,12 @@ export default {
     },
     position() {
       return this.$store.state.playback.position;
+    },
+    presets() {
+      return this.$store.state.presets.presets;
+    },
+    sources() {
+      return this.$store.state.voctomix.sources;
     },
     stopped() {
       return this.$store.state.playback.playback == 'stopped';
