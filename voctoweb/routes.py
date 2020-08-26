@@ -1,5 +1,6 @@
 import logging
 from asyncio import wait_for
+from asyncio.exceptions import CancelledError
 
 from aiohttp import WSMsgType, hdrs, web
 
@@ -95,6 +96,10 @@ async def websocket_handler(request):
             else:
                 log.error('Unknown WS message %r from %i (%s)',
                           body, wsid, username)
+    except CancelledError:
+        raise
+    except:
+        log.exception('WS %i (%s) failed', wsid, username)
     finally:
         log.info('WebSocket connection %i (%s) closed', wsid, username)
         broadcaster.remove_ws(username, wsid)
