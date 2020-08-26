@@ -12,8 +12,12 @@
         </button>
       </li>
       <li class="list-group-item" v-if="file">Selected: {{ file }}</li>
-      <li class="list-group-item" v-if="position">Position: {{ position }}</li>
-      <li class="list-group-item" v-if="duration">Duration: {{ duration }}</li>
+      <li class="list-group-item" v-if="position">
+        Position: {{ position }} / {{ duration }}
+      </li>
+      <li class="list-group-item" v-else-if="duration">
+        Duration: {{ duration }}
+      </li>
       <li class="list-group-item" v-if="playing">
         <button class="btn btn-danger" v-on:click="stop">
           <b-icon-stop-fill /> Stop
