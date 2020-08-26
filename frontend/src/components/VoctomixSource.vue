@@ -100,7 +100,7 @@ export default {
       this.send('fullscreen');
     },
     fullscreen_solo() {
-      this.$store.dispatch('fullscreen_solo', this.source);
+      this.send('fullscreen_solo');
     },
     on_key_down(ev) {
       const source_number = this.index + 1;

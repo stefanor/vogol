@@ -94,6 +94,14 @@ class Voctomix:
         if action == 'fullscreen':
             await send('set_composite_mode', 'fullscreen')
             await send('set_video_a', source)
+        elif action == 'fullscreen_solo':
+            await send('set_composite_mode', 'fullscreen')
+            await send('set_video_a', source)
+            for other_source, level in self.state['audio'].items():
+                if source == other_source and level < 0.2:
+                    await send('set_audio_volume', source, '1')
+                if source != other_source and level > 0.2:
+                    await send('set_audio_volume', source, '0')
         elif action == 'preset':
             preset_def = self.presets[preset]
             await send('set_video_a', preset_def.video_a)

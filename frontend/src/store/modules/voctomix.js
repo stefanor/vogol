@@ -19,38 +19,6 @@ const mutations = {
 };
 
 const actions = {
-  fullscreen_solo({dispatch, state}, source) {
-    dispatch('send_action', {
-      type: 'voctomix',
-      action: {
-        action: 'fullscreen',
-        source,
-      },
-    });
-    for (const [other_source, level] of Object.entries(state.audio)) {
-      if (source == other_source) {
-        if (level < 0.2) {
-          dispatch('send_action', {
-            type: 'voctomix',
-            action: {
-              action: 'unmute',
-              source: source,
-            },
-          });
-        }
-      } else {
-        if (level > 0.2) {
-          dispatch('send_action', {
-            type: 'voctomix',
-            action: {
-              action: 'mute',
-              source: other_source,
-            },
-          });
-        }
-      }
-    }
-  },
   voctomix_action({dispatch}, action) {
     dispatch('send_action', {type: 'voctomix', action});
   },
