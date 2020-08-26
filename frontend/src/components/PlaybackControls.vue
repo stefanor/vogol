@@ -53,7 +53,6 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
 import {BFormRadio, BIconPlayFill, BIconStopFill, BModal} from 'bootstrap-vue';
 
 export default {
@@ -66,14 +65,26 @@ export default {
     BIconStopFill,
     BModal,
   },
-  computed: mapState({
-    duration: state => state.playback.duration,
-    file: state => state.playback.file,
-    files: state => state.playback.files,
-    playing: state => state.playback.playback == 'playing',
-    position: state => state.playback.position,
-    stopped: state => state.playback.playback == 'stopped',
-  }),
+  computed: {
+    duration() {
+      return this.$store.state.playback.duration;
+    },
+    file() {
+      return this.$store.state.playback.file;
+    },
+    files() {
+      return this.$store.state.playback.files;
+    },
+    playing() {
+      return this.$store.state.playback.playback == 'playing';
+    },
+    position() {
+      return this.$store.state.playback.position;
+    },
+    stopped() {
+      return this.$store.state.playback.playback == 'stopped';
+    },
+  },
   methods: {
     load_file() {
       const file = this.selected_file;
