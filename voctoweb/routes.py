@@ -1,6 +1,5 @@
 import logging
-from asyncio import wait_for
-from asyncio.exceptions import CancelledError
+from asyncio import CancelledError, wait_for
 from dataclasses import asdict
 
 from aiohttp import WSMsgType, hdrs, web
