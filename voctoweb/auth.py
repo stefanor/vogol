@@ -54,8 +54,8 @@ async def session_middleware(request, handler):
 @auth_routes.get('/login')
 async def login(request):
     config = request.app['config']
-    redirect_uri = f'{config["server_url"]}/login/complete'
-    client = WebApplicationClient(config['salsa_client_id'])
+    redirect_uri = f'{config.server_url}/login/complete'
+    client = WebApplicationClient(config.salsa_client_id)
     state = generate_token()
     dest = client.prepare_request_uri(
         'https://salsa.debian.org/oauth/authorize', state=state,
