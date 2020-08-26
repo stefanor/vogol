@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card playback-controls">
     <div class="card-header">
       Recordings
       <b-icon-play-fill scale="1.5" v-if="playing" />
@@ -102,3 +102,10 @@ export default {
   },
 };
 </script>
+<style>
+.playback-controls li {
+  max-width: 30rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>
