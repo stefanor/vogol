@@ -94,6 +94,7 @@ class VideoPlayer:
     async def stop(self):
         """Stop playback of the current file"""
         self.playback = 'stopped'
+        self.position = None
         await self.broadcast_state()
         if self.playback_future:
             set_result(self.playback_future, None)
