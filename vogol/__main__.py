@@ -3,16 +3,16 @@ import logging
 
 from aiohttp import web
 
-from voctoweb.app import app_factory
-from voctoweb.config import parse_config
+from vogol.app import app_factory
+from vogol.config import parse_config
 
 
 def main():
-    p = argparse.ArgumentParser('Voctoweb API')
+    p = argparse.ArgumentParser('Vogol API')
     p.add_argument('-v', '--verbose', action='store_true',
                    help='Increase verbosity')
     p.add_argument('-c', '--config',
-                   default='/etc/voctomix/voctoweb.ini',
+                   default='/etc/voctomix/vogol.ini',
                    help='Configuration file')
     args = p.parse_args()
 

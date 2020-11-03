@@ -1,4 +1,4 @@
-# voctovue
+# Vogol Vue UI
 
 This JS app is built out of [Vue.js][vue] with [Vuex][vuex].
 
@@ -22,7 +22,7 @@ app in your browser.
 By default, it will proxy requests for the backend URLs to
 `http://127.0.0.1:8080/` (a local dev instance),
 you can change this by exporting
-`BACKEND=https://voctoweb.example.com/`, or customize proxying in
+`BACKEND=https://vogol.example.com/`, or customize proxying in
 `vue.config.js`.
 
 See the [Vue CLI Configuration Reference][vue-cli-config]

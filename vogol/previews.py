@@ -1,7 +1,7 @@
 import logging
 from asyncio import get_running_loop
 
-from voctoweb.gst import Gst, stop_pipeline
+from vogol.gst import Gst, stop_pipeline
 
 
 log = logging.getLogger(__name__)

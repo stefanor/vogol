@@ -1,11 +1,11 @@
 from aiohttp import web
 
-from voctoweb.auth import auth_middleware, auth_routes, session_middleware
-from voctoweb.gst import start_glib, stop_glib, stop_gst_pipelines
-from voctoweb.playback import initialize_player, stop_player
-from voctoweb.routes import routes
-from voctoweb.voctomix import connect_voctomix, disconnect_voctomix
-from voctoweb.broadcaster import WSBroadcaster
+from vogol.auth import auth_middleware, auth_routes, session_middleware
+from vogol.gst import start_glib, stop_glib, stop_gst_pipelines
+from vogol.playback import initialize_player, stop_player
+from vogol.routes import routes
+from vogol.voctomix import connect_voctomix, disconnect_voctomix
+from vogol.broadcaster import WSBroadcaster
 
 
 async def app_factory(config):

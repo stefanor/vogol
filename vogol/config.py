@@ -50,17 +50,17 @@ def parse_config(config_file):
             )
 
 
-    voctoweb = cfgp['voctoweb']
+    vogol = cfgp['vogol']
     config = Config(
-        host=voctoweb['host'],
+        host=vogol['host'],
         presets=presets,
-        require_salsa_auth=voctoweb.getboolean('require_salsa_auth'),
-        recordings=Path(voctoweb['recordings']),
-        room_name=voctoweb['room_name'],
-        salsa_client_id=voctoweb.get('salsa_client_id'),
-        salsa_client_secret=voctoweb.get('salsa_client_secret'),
-        salsa_group=voctoweb.get('salsa_group'),
-        server_url=voctoweb['server_url'],
-        video_only_sources=parse_config_list(voctoweb, 'video_only_sources'),
+        require_salsa_auth=vogol.getboolean('require_salsa_auth'),
+        recordings=Path(vogol['recordings']),
+        room_name=vogol['room_name'],
+        salsa_client_id=vogol.get('salsa_client_id'),
+        salsa_client_secret=vogol.get('salsa_client_secret'),
+        salsa_group=vogol.get('salsa_group'),
+        server_url=vogol['server_url'],
+        video_only_sources=parse_config_list(vogol, 'video_only_sources'),
     )
     return config

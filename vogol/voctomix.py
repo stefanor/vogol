@@ -5,8 +5,8 @@ from asyncio import (
     wait_for)
 from collections import defaultdict
 
-from voctoweb.gst import stop_pipelines
-from voctoweb.previews import preview_pipeline
+from vogol.gst import stop_pipelines
+from vogol.previews import preview_pipeline
 
 log = logging.getLogger(__name__)
 

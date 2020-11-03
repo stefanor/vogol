@@ -6,8 +6,8 @@
       v-bind:variant="all_good ? 'success' : 'danger'"
     >
       <b-navbar-brand href="#">
-        <img v-bind:src="voctoweb_logo" id="nav-logo" />
-        VoctoWeb: {{ room_name }}
+        <img v-bind:src="vogol_logo" id="nav-logo" />
+        Vogol: {{ room_name }}
       </b-navbar-brand>
       <NavBarControls />
     </b-navbar>
@@ -44,7 +44,7 @@
       <div class="container-fluid">
         <span class="text-muted">
           Source:
-          <a href="https://salsa.debian.org/debconf-video-team/voctoweb"
+          <a href="https://salsa.debian.org/debconf-video-team/vogol"
             >on Salsa</a
           >
         </span>
@@ -61,7 +61,7 @@
       no-close-on-esc
       ok-only
     >
-      <p>You need to login to use VoctWeb.</p>
+      <p>You need to login to use Vogol.</p>
       <p>Login is managed through Salsa.</p>
     </b-modal>
   </div>
@@ -86,7 +86,7 @@ Vue.use(ModalPlugin);
 Vue.use(NavbarPlugin);
 
 export default {
-  name: 'VoctoWeb',
+  name: 'Vogol',
   components: {
     ConnectedUsers,
     KeyboardHelp,
@@ -97,7 +97,7 @@ export default {
     VoctomixSource,
   },
   data: () => ({
-    voctoweb_logo: favicon_svg,
+    vogol_logo: favicon_svg,
   }),
   computed: mapState({
     all_good: state =>
@@ -123,7 +123,7 @@ export default {
   },
   watch: {
     room_name(room_name) {
-      document.title = 'VoctoWeb: ' + room_name;
+      document.title = 'Vogol: ' + room_name;
     },
   },
 };
