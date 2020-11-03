@@ -212,10 +212,6 @@ class VoctomixControl:
 
     async def send(self, *command):
         """Send a command to voctomix"""
-        cmd = ' '.join(command)
-        self._writer.write(cmd.encode('utf-8'))
-        self._writer.write(b'\n')
-        await self._writer.drain()
         last_responses = {
             'get_audio': 'audio_status',
             'get_config': 'server_config',
@@ -232,7 +228,14 @@ class VoctomixControl:
             'set_video_b': 'video_status',
             'set_videos_and_composite': 'composite_mode_and_video_status',
         }
-        return await self.expect(last_responses[command[0]])
+        completion = self.expect(last_responses[command[0]])
+
+        cmd = ' '.join(command)
+        self._writer.write(cmd.encode('utf-8'))
+        self._writer.write(b'\n')
+        await self._writer.drain()
+
+        return await completion
 
     async def expect(self, command):
         """Wait for a particular response from voctomix"""
