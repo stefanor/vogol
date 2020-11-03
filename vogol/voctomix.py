@@ -92,11 +92,9 @@ class Voctomix:
         """Fire an action requested by the client"""
         send = self.control.send
         if action == 'fullscreen':
-            await send('set_composite_mode', 'fullscreen')
-            await send('set_video_a', source)
+            await send('set_videos_and_composite', source, '*', 'fullscreen')
         elif action == 'fullscreen_solo':
-            await send('set_composite_mode', 'fullscreen')
-            await send('set_video_a', source)
+            await send('set_videos_and_composite', source, '*', 'fullscreen')
             for other_source, level in self.state['audio'].items():
                 if source == other_source and level < 0.2:
                     await send('set_audio_volume', source, '1')
@@ -232,6 +230,7 @@ class VoctomixControl:
             'set_stream_loop': 'stream_status',
             'set_video_a': 'video_status',
             'set_video_b': 'video_status',
+            'set_videos_and_composite': 'composite_mode_and_video_status',
         }
         return await self.expect(last_responses[command[0]])
 
