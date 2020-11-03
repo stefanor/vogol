@@ -23,6 +23,9 @@ class Voctomix:
 
     async def connect(self, reconnect_on_error=False):
         """Connect to control, and optionally reconnect forever"""
+        if self.control.connected or (
+                self.reconnection_task and not self.reconnection_task.done()):
+            raise Exception('Already connected/connecting')
         if reconnect_on_error:
             self.reconnection_task = create_task(self.maintain_connection())
         else:
@@ -183,6 +186,10 @@ class VoctomixControl:
         if not self._writer.is_closing():
             self._writer.close()
         self.disconnection.set_result(reason)
+
+    @property
+    def connected(self):
+        return self.state.get('connected', False)
 
     async def reader(self):
         """Follow events from the core
