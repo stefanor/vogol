@@ -113,9 +113,9 @@ class Voctomix:
                     await send('set_audio_volume', source, '0')
         elif action == 'set_composite_mode':
             await send('set_composite_mode', mode)
-        elif action =='set_a':
+        elif action == 'set_a':
             await send('set_video_a', source)
-        elif action =='set_b':
+        elif action == 'set_b':
             await send('set_video_b', source)
         elif action == 'stream_live':
             await send('set_stream_live')

@@ -100,7 +100,7 @@ async def websocket_handler(request):
                           body, wsid, username)
     except CancelledError:
         raise
-    except:
+    except Exception:
         log.exception('WS %i (%s) failed', wsid, username)
     finally:
         log.info('WebSocket connection %i (%s) closed', wsid, username)

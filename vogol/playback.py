@@ -83,7 +83,6 @@ class VideoPlayer:
         if not self.file:
             raise Exception('No file selected to play')
 
-
         path = self.config.recordings / self.file
         host = self.voctomix.host
         port = self.voctomix.source_port(self.source_name)
@@ -111,9 +110,10 @@ class VideoPlayer:
             if 'source' in self.after_playback:
                 source = self.after_playback['source']
                 if source in self.config.video_only_sources:
-                    await self.voctomix.action('fullscreen', source=source)
+                    action = 'fullscreen'
                 else:
-                    await self.voctomix.action('fullscreen_solo', source=source)
+                    action = 'fullscreen_solo'
+                await self.voctomix.action(action, source=source)
             elif 'preset' in self.after_playback:
                 preset = self.after_playback['preset']
                 await self.voctomix.action('preset', preset=preset)

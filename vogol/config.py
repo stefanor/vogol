@@ -49,7 +49,6 @@ def parse_config(config_file):
                 video_b=section.get('video_b'),
             )
 
-
     vogol = cfgp['vogol']
     config = Config(
         host=vogol['host'],
