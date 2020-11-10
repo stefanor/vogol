@@ -20,7 +20,7 @@ async def preview_pipeline(host, port, source, broadcaster, gst_pipelines):
     ! queue
     ! audioconvert
     ! audio/x-raw, channels=1
-    ! level interval=1000000000
+    ! level interval=300000000
     ! fakesink
 
     demux.
