@@ -140,7 +140,7 @@ div.vu-rms {
   position: absolute;
   display: block;
   bottom: 0px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2);
   width: 100%;
 }
 div.vu-decay {
