@@ -6,8 +6,9 @@
     />
     <div class="audio-level-bg" v-bind:class="{room: isRoom, source: isSource}">
       <div class="vu-wrapper" v-bind:class="{room: isRoom, source: isSource}">
-        <div class="vu-rms" v-bind:style="{height: audio_rms + '%'}"></div>
-        <div class="vu-peak" v-bind:style="{top: audio_peak + '%'}"></div>
+        <div class="vu-peak" v-bind:style="{height: 100 - audio_peak + '%'}"></div>
+        <div class="vu-rms" v-bind:style="{height:  audio_rms + '%'}"></div>
+        <div class="vu-decay" v-bind:style="{top: 100 - audio_decay + '%'}"></div>
       </div>
     </div>
   </div>
@@ -15,6 +16,21 @@
 
 <script>
 import {mapState} from 'vuex';
+
+function clamp(value, min_value=0, max_value=1) {
+  return Math.max(Math.min(value, max_value), min_value);
+}
+
+function normalize_db(db) {
+  /* -60db -> 1.00 (very quiet)
+   * -30db -> 0.75
+   * -15db -> 0.50
+   *  -5db -> 0.25
+   *  -0db -> 0.00 (very loud)
+   */
+  const logscale = 1 - Math.log10(-0.15 * db + 1);
+  return clamp(logscale);
+}
 
 export default {
   props: ['room'],
@@ -28,18 +44,22 @@ export default {
     isSource() {
       return this.room != 'room';
     },
+    audio_decay(state) {
+      const level = state.previews.audio_levels[this.room];
+      if (level) {
+        return 100 * normalize_db(level.decay);
+      }
+    },
     audio_peak(state) {
       const level = state.previews.audio_levels[this.room];
       if (level) {
-        const db = level.peak;
-        return 100 - 10 ** (db / 20) * 80;
+        return 100 * normalize_db(level.peak);
       }
     },
     audio_rms(state) {
       const level = state.previews.audio_levels[this.room];
       if (level) {
-        const db = level.rms;
-        return 100 - 10 ** (db / 20) * 80;
+        return 100 * normalize_db(level.rms);
       }
     },
     preview(state) {
@@ -109,14 +129,21 @@ div.vu-wrapper {
   width: 10px;
 }
 
-div.vu-rms {
+div.vu-peak {
   position: absolute;
   display: block;
   top: 0px;
   background: black;
   width: 100%;
 }
-div.vu-peak {
+div.vu-rms {
+  position: absolute;
+  display: block;
+  bottom: 0px;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+}
+div.vu-decay {
   display: block;
   position: absolute;
   background: red;
