@@ -164,10 +164,10 @@ class VoctomixControl:
         self.reader_task = create_task(self.reader())
 
         # Initialize our state
-        await self.send('get_config')
-        await self.send('get_audio')
-        await self.send('get_stream_status')
-        await self.send('get_composite_mode_and_video_status')
+        await self.send_await_reply('get_config')
+        await self.send_await_reply('get_audio')
+        await self.send_await_reply('get_stream_status')
+        await self.send_await_reply('get_composite_mode_and_video_status')
         self.state['connected'] = True
 
     async def disconnect(self, reason=None):
@@ -219,6 +219,16 @@ class VoctomixControl:
 
     async def send(self, *command):
         """Send a command to voctomix"""
+        cmd = ' '.join(command)
+        self._writer.write(cmd.encode('utf-8'))
+        self._writer.write(b'\n')
+        await self._writer.drain()
+
+    async def send_await_reply(self, *command):
+        """Send a command to voctomix.
+
+        Only returning once we have processed the response.
+        """
         last_responses = {
             'get_audio': 'audio_status',
             'get_config': 'server_config',
@@ -236,12 +246,7 @@ class VoctomixControl:
             'set_videos_and_composite': 'composite_mode_and_video_status',
         }
         completion = self.expect(last_responses[command[0]])
-
-        cmd = ' '.join(command)
-        self._writer.write(cmd.encode('utf-8'))
-        self._writer.write(b'\n')
-        await self._writer.drain()
-
+        await self.send(*command)
         return await completion
 
     async def expect(self, command):
