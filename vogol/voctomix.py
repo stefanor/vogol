@@ -38,8 +38,10 @@ class Voctomix:
                 await self.control.disconnection
             except CancelledError:
                 return
-            except Exception as e:
+            except IOError as e:
                 log.error("Failed to connect: %s", e)
+            except Exception as e:
+                log.exception("Failed to connect: %s", e)
             await sleep(5)
             await self._disconnect()
 
