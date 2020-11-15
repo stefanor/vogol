@@ -58,7 +58,7 @@ async def login(request):
     client = WebApplicationClient(config.gitlab_client_id)
     state = generate_token()
     dest = client.prepare_request_uri(
-        f'{config.gitlab_url}'/oauth/authorize', state=state,
+        f'{config.gitlab_url}/oauth/authorize', state=state,
         scope='openid', redirect_uri=redirect_uri)
     response = web.Response(status=302, headers={hdrs.LOCATION: dest})
     response.set_cookie('oauth2-state', state, httponly=True)
@@ -75,7 +75,7 @@ async def login_complete(request):
         f'{config.server_url}{request.path_qs}', state)
     code = result['code']
     async with ClientSession() as session:
-        r = await session.post(f'{config.gitlab_url}'/oauth/token', data={
+        r = await session.post(f'{config.gitlab_url}/oauth/token', data={
             'client_id': config.gitlab_client_id,
             'client_secret': config.gitlab_client_secret,
             'code': code,
@@ -87,7 +87,7 @@ async def login_complete(request):
         token = await r.json()
 
         auth_headers = {hdrs.AUTHORIZATION: f'Bearer {token["access_token"]}'}
-        r = await session.get(f'{config.gitlab_url}'/oauth/userinfo',
+        r = await session.get(f'{config.gitlab_url}/oauth/userinfo',
                               headers=auth_headers)
         if not r.status == 200:
             raise Exception('Failed to retrieve UserInfo')
