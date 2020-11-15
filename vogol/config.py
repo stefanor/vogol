@@ -17,11 +17,12 @@ class Preset:
 class Config:
     host: str
     presets: Dict[str, Preset]
-    require_salsa_auth: bool
+    require_gitlab_auth: bool
     room_name: str
-    salsa_client_id: Optional[str]
-    salsa_client_secret: Optional[str]
-    salsa_group: Optional[List[str]]
+    gitlab_client_id: Optional[str]
+    gitlab_client_secret: Optional[str]
+    gitlab_group: Optional[List[str]]
+    gitlab_url: Optional[str]
     server_url: str
     video_only_sources: List[str]
     recordings: Path
@@ -53,12 +54,13 @@ def parse_config(config_file):
     config = Config(
         host=vogol['host'],
         presets=presets,
-        require_salsa_auth=vogol.getboolean('require_salsa_auth'),
+        require_gitlab_auth=vogol.getboolean('require_gitlab_auth'),
         recordings=Path(vogol['recordings']),
         room_name=vogol['room_name'],
-        salsa_client_id=vogol.get('salsa_client_id'),
-        salsa_client_secret=vogol.get('salsa_client_secret'),
-        salsa_group=vogol.get('salsa_group'),
+        gitlab_client_id=vogol.get('gitlab_client_id'),
+        gitlab_client_secret=vogol.get('gitlab_client_secret'),
+        gitlab_group=vogol.get('gitlab_group'),
+        gitlab_url=vogol.get('gitlab_url'),
         server_url=vogol['server_url'],
         video_only_sources=parse_config_list(vogol, 'video_only_sources'),
     )
