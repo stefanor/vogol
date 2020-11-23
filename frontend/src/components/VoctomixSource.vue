@@ -1,8 +1,15 @@
 <template>
   <div class="card">
-    <div class="card-header source-header">
+    <div
+      class="card-header source-header"
+      v-bind:class="[is_muted ? '' : 'bg-success']"
+    >
       <div class="source-name">
         {{ title }}
+      </div>
+      <div class="badge volume-badge">
+        <b-icon-volume-mute-fill scale="1.5" v-if="is_muted" />
+        <b-icon-volume-up-fill scale="1.5" v-else />
       </div>
       <button
         class="btn source-a"
