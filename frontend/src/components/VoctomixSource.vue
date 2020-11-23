@@ -4,7 +4,29 @@
       <div class="source-name">
         {{ title }}
       </div>
-      <div>
+      <button
+        class="btn source-a"
+        v-bind:disabled="is_fullscreen_solo"
+        v-on:click="fullscreen_solo"
+        v-if="!is_video_only"
+      >
+        Fullscreen Solo
+      </button>
+      <button
+        class="btn source-a"
+        v-bind:disabled="is_fullscreen"
+        v-on:click="fullscreen"
+        v-if="is_video_only"
+      >
+        Fullscreen
+      </button>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <VideoPreview v-bind:room="source" />
+      </li>
+      <li class="list-group-item">
+        Video:
         <button
           class="btn source"
           v-bind:class="{'source-a': source_a, 'btn-light': !source_a}"
@@ -21,29 +43,11 @@
         >
           B
         </button>
-      </div>
-    </div>
-    <div class="card-body">
-      <VideoPreview v-bind:room="source" />
-      <button
-        class="btn source-a"
-        v-bind:disabled="is_fullscreen"
-        v-on:click="fullscreen"
-        v-if="is_video_only"
-      >
-        Fullscreen
-      </button>
-      <button
-        class="btn source-a"
-        v-bind:disabled="is_fullscreen_solo"
-        v-on:click="fullscreen_solo"
-        v-if="!is_video_only"
-      >
-        Fullscreen Solo
-      </button>
-      <br />
-      <AudioControl v-bind:source="source" v-if="!is_video_only" />
-    </div>
+      </li>
+      <li class="list-group-item" v-if="!is_video_only">
+        <AudioControl v-bind:source="source" />
+      </li>
+    </ul>
   </div>
 </template>
 

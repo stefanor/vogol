@@ -1,5 +1,20 @@
 <template>
   <div class="audio-control">
+    Audio:
+    <button
+      class="btn btn-danger"
+      v-bind:disabled="muted"
+      v-on:click="send('mute')"
+    >
+      Mute
+    </button>
+    <button
+      class="btn btn-success"
+      v-bind:disabled="unity"
+      v-on:click="send('unmute')"
+    >
+      0 db
+    </button>
     <div class="volume">
       <b-popover
         v-bind:target="'volume-badge-' + source"
@@ -26,20 +41,6 @@
         {{ volume_db }} dB ({{ volume_percent }} %)
       </div>
     </div>
-    <button
-      class="btn btn-danger"
-      v-bind:disabled="muted"
-      v-on:click="send('mute')"
-    >
-      Mute
-    </button>
-    <button
-      class="btn btn-success"
-      v-bind:disabled="unity"
-      v-on:click="send('unmute')"
-    >
-      0 db
-    </button>
   </div>
 </template>
 
@@ -98,10 +99,6 @@ export default {
 </script>
 
 <style>
-.audio-control {
-  padding-top: 1em;
-}
-
 .audio-control .volume {
   padding-top: 1rem;
   padding-bottom: 1rem;
