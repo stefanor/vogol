@@ -52,46 +52,33 @@
         </button>
       </li>
       <li class="list-group-item" v-if="!is_video_only">
-        Audio:
-        <button
-          class="btn btn-danger"
-          v-bind:disabled="is_muted"
-          v-on:click="send('mute')"
-        >
-          Mute
-        </button>
-        <button
-          class="btn btn-success"
-          v-bind:disabled="is_unity"
-          v-on:click="send('unmute')"
-        >
-          0 db
-        </button>
+        <div>
+          Audio:
+          <button
+            class="btn btn-danger"
+            v-bind:disabled="is_muted"
+            v-on:click="send('mute')"
+          >
+            Mute
+          </button>
+          <button
+            class="btn btn-success"
+            v-bind:disabled="is_unity"
+            v-on:click="send('unmute')"
+          >
+            0 db
+          </button>
+        </div>
         <div class="volume">
-          <b-popover
-            v-bind:target="'volume-badge-' + source"
-            triggers="focus"
-            placement="top"
-            title="Fader (dB)"
-          >
-            <b-form-input
-              type="range"
-              v-model="volume_db"
-              step="0.5"
-              min="-20"
-              max="10"
-            ></b-form-input>
-          </b-popover>
-          <div
-            tabindex="0"
-            class="badge badge-info volume-badge"
-            v-bind:id="'volume-badge-' + source"
-            v-bind:class="[is_muted ? 'badge-danger' : 'badge-success']"
-          >
-            <b-icon-volume-mute-fill scale="1.5" v-if="is_muted" />
-            <b-icon-volume-up-fill scale="1.5" v-else />
-            {{ volume_db }} dB ({{ volume_percent }} %)
-          </div>
+          Level:
+          {{ volume_percent }}%
+          <b-form-input
+            type="range"
+            v-model="volume_db"
+            step="0.5"
+            min="-20"
+            max="10"
+          ></b-form-input>
         </div>
       </li>
     </ul>
@@ -103,7 +90,6 @@ import {
   BFormInput,
   BIconVolumeUpFill,
   BIconVolumeMuteFill,
-  BPopover,
 } from 'bootstrap-vue';
 import startCase from 'lodash/startCase';
 import {mapState} from 'vuex';
@@ -116,7 +102,6 @@ export default {
     BFormInput,
     BIconVolumeUpFill,
     BIconVolumeMuteFill,
-    BPopover,
     VideoPreview,
   },
   computed: Object.assign(
@@ -234,7 +219,6 @@ export default {
 }
 .volume {
   padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 .volume-badge {
   font-size: 1.2rem;
