@@ -10,7 +10,7 @@
         v-on:click="fullscreen_solo"
         v-if="!is_video_only"
       >
-        Fullscreen Solo
+        Select
       </button>
       <button
         class="btn source-a"
@@ -18,7 +18,7 @@
         v-on:click="fullscreen"
         v-if="is_video_only"
       >
-        Fullscreen
+        Select Video
       </button>
     </div>
     <ul class="list-group list-group-flush">
