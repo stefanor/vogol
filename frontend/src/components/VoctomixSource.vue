@@ -71,7 +71,7 @@
         </div>
         <div class="volume">
           Level:
-          {{ volume_percent }}%
+          {{ volume_percent }}% ({{ volume_db }} dB)
           <b-form-input
             type="range"
             v-model="volume_db"
