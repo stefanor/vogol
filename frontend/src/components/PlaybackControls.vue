@@ -32,7 +32,10 @@
         After Playback:
         <select v-model="after_playback">
           <option value="null">Do Nothing, black screen</option>
-          <option v-for="source in sources" v-bind:key="source" v-bind:value="JSON.stringify({source})"
+          <option
+            v-for="source in sources"
+            v-bind:key="source"
+            v-bind:value="JSON.stringify({source})"
             >Source: {{ source }}</option
           >
           <option
@@ -88,7 +91,10 @@ export default {
       },
       set(value) {
         const after_playback = JSON.parse(value);
-        this.$store.dispatch('playback_action', {action: 'after_playback', after_playback});
+        this.$store.dispatch('playback_action', {
+          action: 'after_playback',
+          after_playback,
+        });
       },
     },
     duration() {

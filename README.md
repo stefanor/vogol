@@ -8,4 +8,4 @@ There is a **README** for frontend in its directory.
 
 ## Screenshots
 
-![MiniDebConf November 2020](docs/screenshots/2020-11-14-minidebconf.jpg)
+![MiniDebConf November 2020](docs/screenshots/2020-11-24-minidebconf.jpg)

@@ -24,7 +24,10 @@ const actions = {
       if (voctomix.sources.indexOf('recording') == -1) {
         console.log("No recording source, can't control it");
       } else {
-        dispatch('voctomix_action', {action: 'fullscreen_solo', source: 'recording'});
+        dispatch('voctomix_action', {
+          action: 'fullscreen_solo',
+          source: 'recording',
+        });
       }
     }
     dispatch('send_action', {type: 'player', action});

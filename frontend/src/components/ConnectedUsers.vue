@@ -28,12 +28,12 @@
           </span>
           <span v-else-if="action.action.after_playback">
             {{ action.action.action }}:
-              <span v-if="action.action.after_playback.source">
-                Source: {{ action.action.after_playback.source }}
-              </span>
-              <span v-else-if="action.action.after_playback.preset">
-                Preset: {{ action.action.after_playback.preset }}
-              </span>
+            <span v-if="action.action.after_playback.source">
+              Source: {{ action.action.after_playback.source }}
+            </span>
+            <span v-else-if="action.action.after_playback.preset">
+              Preset: {{ action.action.after_playback.preset }}
+            </span>
           </span>
           <span v-else>
             {{ action.action.action }}

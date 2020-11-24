@@ -6,9 +6,15 @@
     />
     <div class="audio-level-bg" v-bind:class="{room: isRoom, source: isSource}">
       <div class="vu-wrapper" v-bind:class="{room: isRoom, source: isSource}">
-        <div class="vu-peak" v-bind:style="{height: 100 - audio_peak + '%'}"></div>
-        <div class="vu-rms" v-bind:style="{height:  audio_rms + '%'}"></div>
-        <div class="vu-decay" v-bind:style="{top: 100 - audio_decay + '%'}"></div>
+        <div
+          class="vu-peak"
+          v-bind:style="{height: 100 - audio_peak + '%'}"
+        ></div>
+        <div class="vu-rms" v-bind:style="{height: audio_rms + '%'}"></div>
+        <div
+          class="vu-decay"
+          v-bind:style="{top: 100 - audio_decay + '%'}"
+        ></div>
       </div>
     </div>
   </div>
@@ -17,7 +23,7 @@
 <script>
 import {mapState} from 'vuex';
 
-function clamp(value, min_value=0, max_value=1) {
+function clamp(value, min_value = 0, max_value = 1) {
   return Math.max(Math.min(value, max_value), min_value);
 }
 
