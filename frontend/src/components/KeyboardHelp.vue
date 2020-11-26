@@ -6,8 +6,7 @@
           <span class="badge badge-light">1</span>
         </th>
         <td>
-          Fullscreen or Fullscreen Solo the first source from the left, as
-          appropriate.
+          Select the first source from the left.
         </td>
       </tr>
       <tr>
@@ -15,8 +14,7 @@
           <span class="badge badge-light">2</span>
         </th>
         <td>
-          Fullscreen or Fullscreen Solo the second source from the left, as
-          appropriate.
+          Select the second source from the left.
         </td>
       </tr>
       <tr>
