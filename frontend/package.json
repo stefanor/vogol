@@ -15,7 +15,7 @@
     "@vue/cli-service": "4.x",
     "babel-eslint": "10.x",
     "bootstrap-vue": "2.x",
-    "bson": "4.x",
+    "bson": "4.2.0",
     "eslint": "6.x",
     "eslint-plugin-vue": "6.x",
     "lodash": "4.x",
