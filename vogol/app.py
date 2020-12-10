@@ -10,7 +10,7 @@ from vogol.broadcaster import WSBroadcaster
 
 async def app_factory(config):
     middlewares = [session_middleware]
-    if config.require_gitlab_auth:
+    if config.auth:
         middlewares.append(auth_middleware)
     app = web.Application(middlewares=middlewares)
     app.add_routes(routes)
