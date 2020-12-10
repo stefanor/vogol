@@ -38,6 +38,12 @@ class AuthGitLab(AuthConfig):
     url: str
 
 
+@dataclass
+class AuthPassword(AuthConfig):
+    type = 'password'
+    htpassdb: str
+
+
 def parse_config_list(config, key):
     text = config.get(key)
     return [item.strip() for item in text.split(',') if item.strip()]
@@ -59,7 +65,9 @@ def parse_config(config_file):
                 name=section.get('name'),
                 url=section.get('url'),
             )
-        if section_name.startswith('preset:'):
+        elif section_name == 'auth:password':
+            auth = AuthPassword(htpassdb=section.get('htpassdb'))
+        elif section_name.startswith('preset:'):
             id_ = section_name.split(':', 1)[1]
             presets[id_] = Preset(
                 audio_solo=parse_config_list(section, 'audio_solo'),

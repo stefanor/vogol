@@ -15,6 +15,30 @@
       <a v-bind:href="url">{{ name }}</a
       >.
     </p>
+    <form
+      id="login-form"
+      method="POST"
+      action="/login"
+      v-if="type == 'password'"
+    >
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          name="username"
+          placeholder="Username"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          type="password"
+          class="form-control"
+          name="password"
+          placeholder="Password"
+        />
+        <input type="submit" hidden="hidden" />
+      </div>
+    </form>
   </b-modal>
 </template>
 
@@ -37,6 +61,9 @@ export default {
       if (this.type == 'gitlab') {
         event.preventDefault();
         window.location = '/login';
+      } else if (this.type == 'password') {
+        event.preventDefault();
+        document.getElementById('login-form').submit();
       }
     },
   },
