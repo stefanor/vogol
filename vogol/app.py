@@ -1,7 +1,7 @@
 from aiohttp import web
 
+from vogol.auth import get_auth_routes
 from vogol.auth.middleware import auth_middleware, session_middleware
-from vogol.auth.routes import auth_routes
 from vogol.gst import start_glib, stop_glib, stop_gst_pipelines
 from vogol.playback import initialize_player, stop_player
 from vogol.routes import routes
@@ -15,7 +15,7 @@ async def app_factory(config):
         middlewares.append(auth_middleware)
     app = web.Application(middlewares=middlewares)
     app.add_routes(routes)
-    app.add_routes(auth_routes)
+    app.add_routes(get_auth_routes(config.auth))
     app['sessions'] = {}
     app['config'] = config
     app['broadcaster'] = WSBroadcaster()
