@@ -1,6 +1,7 @@
 from aiohttp import web
 
-from vogol.auth import auth_middleware, auth_routes, session_middleware
+from vogol.auth.middleware import auth_middleware, session_middleware
+from vogol.auth.routes import auth_routes
 from vogol.gst import start_glib, stop_glib, stop_gst_pipelines
 from vogol.playback import initialize_player, stop_player
 from vogol.routes import routes

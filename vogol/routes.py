@@ -4,7 +4,7 @@ from dataclasses import asdict
 
 from aiohttp import WSMsgType, hdrs, web
 
-from vogol.auth import require_login
+from vogol.auth.middleware import require_login
 
 
 log = logging.getLogger(__name__)
