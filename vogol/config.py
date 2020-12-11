@@ -57,6 +57,9 @@ def parse_config(config_file):
     presets = {}
     for section_name in cfgp.sections():
         section = cfgp[section_name]
+        if section_name.startswith('auth:') and auth is not None:
+            raise Exception(
+                'Only a single auth backend can be enabled in config.')
         if section_name == 'auth:gitlab':
             auth = AuthGitLab(
                 client_id=section.get('client_id'),
