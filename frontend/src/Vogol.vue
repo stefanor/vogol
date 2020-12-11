@@ -51,29 +51,18 @@
       </div>
     </footer>
     <KeyboardHelp />
-    <b-modal
-      title="Not Logged In"
-      ok-title="Login"
-      v-model="logged_out"
-      v-on:ok="loginButton"
-      centered
-      hide-header-close
-      no-close-on-esc
-      ok-only
-    >
-      <p>You need to login to use Vogol.</p>
-      <p>Login is managed through Salsa.</p>
-    </b-modal>
+    <LoginModal />
   </div>
 </template>
 
 <script>
 import Vue from 'vue';
-import {AlertPlugin, NavbarPlugin, ModalPlugin} from 'bootstrap-vue';
+import {AlertPlugin, NavbarPlugin} from 'bootstrap-vue';
 import {mapState} from 'vuex';
 
 import ConnectedUsers from './components/ConnectedUsers.vue';
 import KeyboardHelp from './components/KeyboardHelp.vue';
+import LoginModal from './components/LoginModal.vue';
 import NavBarControls from './components/NavBarControls.vue';
 import PlaybackControls from './components/PlaybackControls.vue';
 import PresetControls from './components/PresetControls.vue';
@@ -82,7 +71,6 @@ import VoctomixSource from './components/VoctomixSource.vue';
 import favicon_svg from './favicon/favicon.svg';
 
 Vue.use(AlertPlugin);
-Vue.use(ModalPlugin);
 Vue.use(NavbarPlugin);
 
 export default {
@@ -90,6 +78,7 @@ export default {
   components: {
     ConnectedUsers,
     KeyboardHelp,
+    LoginModal,
     NavBarControls,
     PlaybackControls,
     PresetControls,
@@ -105,17 +94,12 @@ export default {
     errors: state => state.errors.errors,
     disconnected: state => !state.voctomix.connected,
     last_update: state => state.websocket.state_last_updated,
-    logged_out: state => state.websocket.connection == 'logged_out',
     room_name: state => state.websocket.room_name,
     sources: state => state.voctomix.sources,
   }),
   methods: {
     dismiss_error(error) {
       this.$store.commit('remove_error', error.key);
-    },
-    loginButton(event) {
-      event.preventDefault();
-      window.location = '/login';
     },
   },
   created() {
