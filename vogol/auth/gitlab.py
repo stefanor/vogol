@@ -65,3 +65,10 @@ async def login_complete(request):
     response = web.Response(status=302, headers={hdrs.LOCATION: '/'})
     response.del_cookie('oauth2-state')
     return response
+
+
+def get_auth_required_dict(auth_config):
+    return {
+        'name': auth_config.name,
+        'url': auth_config.url,
+    }

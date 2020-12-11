@@ -1,7 +1,10 @@
 import functools
+import json
 
 from aiohttp import web
 from oauthlib.common import generate_token
+
+from vogol.auth import get_auth_required_dict
 
 
 def require_login(func):
@@ -15,9 +18,13 @@ def require_login(func):
 
 @web.middleware
 async def auth_middleware(request, handler):
+    config = request.app['config']
     if getattr(handler, 'require_login', False):
         if 'username' not in request['session']:
-            raise web.HTTPForbidden()
+            auth_dict = get_auth_required_dict(config.auth)
+            raise web.HTTPForbidden(
+                text=json.dumps(auth_dict),
+                content_type='application/json')
     return await handler(request)
 
 

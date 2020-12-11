@@ -34,6 +34,7 @@ class AuthGitLab(AuthConfig):
     client_id: str
     client_secret: str
     group: Optional[List[str]]
+    name: str
     url: str
 
 
@@ -55,6 +56,7 @@ def parse_config(config_file):
                 client_id=section.get('client_id'),
                 client_secret=section.get('client_secret'),
                 group=section.get('group'),
+                name=section.get('name'),
                 url=section.get('url'),
             )
         if section_name.startswith('preset:'):

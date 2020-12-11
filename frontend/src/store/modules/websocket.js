@@ -56,8 +56,9 @@ const actions = {
     commit('remove_error', 'ws');
   },
 
-  logout({commit}) {
+  logout({commit}, config) {
     commit('logout');
+    commit('auth_display', config);
   },
 
   ws_message_raw({dispatch}, ev) {
@@ -123,7 +124,9 @@ const actions = {
       credentials: 'same-origin',
     }).then(response => {
       if (response.status == 403) {
-        dispatch('logout');
+        response.json().then(body => {
+          dispatch('logout', body);
+        });
       }
     });
   },
