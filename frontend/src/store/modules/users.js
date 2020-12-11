@@ -1,7 +1,6 @@
 const state = () => ({
   connected_users: [],
   recent_actions: [],
-  username: null,
 });
 
 const mutations = {
@@ -29,9 +28,6 @@ const mutations = {
     if (state.recent_actions.length >= 5) {
       state.recent_actions.shift();
     }
-  },
-  user_config(state, config) {
-    state.username = config.username;
   },
 };
 
