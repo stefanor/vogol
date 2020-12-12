@@ -9,7 +9,9 @@ controls, but through the web.
 
 Vogol has some features beyond voctogui:
 
- * Authentication: OIDC SSO (currently only from GitLab instances).
+ * Authentication:
+   * htpassword files (using any hash supported by [passlib](https://passlib.readthedocs.io)).
+   * OIDC SSO (currently only from GitLab instances).
  * Playback of pre-recorded video files into a voctomix source.
  * A live log of other connected users' actions.
  * VU meters on every source.
