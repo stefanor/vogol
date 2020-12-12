@@ -64,6 +64,7 @@ export default {
     ],
   }),
   computed: mapState({
+    connected: state => state.voctomix.connected,
     composite_mode: state => state.voctomix.composite_mode,
     layout_name() {
       const layout = this.layouts.find(
@@ -83,6 +84,9 @@ export default {
   }),
   methods: {
     on_key_down(ev) {
+      if (!this.connected) {
+        return;
+      }
       const layout = this.layouts.find(layout => layout.key == ev.key);
       if (layout) {
         ev.preventDefault();

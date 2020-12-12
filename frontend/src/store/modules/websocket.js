@@ -119,6 +119,7 @@ const actions = {
       priority: 100,
     });
     commit('disconnected');
+    commit('voctomix_state_update', {connected: false});
     // We can't see 403s from WebSockets
     fetch('/ws', {
       credentials: 'same-origin',
@@ -138,6 +139,7 @@ const actions = {
       priority: 100,
     });
     commit('disconnected');
+    commit('voctomix_state_update', {connected: false});
     setTimeout(() => dispatch('connect'), 1000);
   },
 
