@@ -50,7 +50,7 @@ export default {
   computed: mapState({
     connected_users: state => state.users.connected_users,
     recent_actions: state => state.users.recent_actions,
-    username: state => state.users.username,
+    username: state => state.auth.username,
   }),
 };
 </script>

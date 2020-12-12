@@ -13,19 +13,35 @@ class Preset:
     video_b: Optional[str]
 
 
+class AuthConfig:
+    pass
+
+
 @dataclass
 class Config:
     host: str
+    auth: AuthConfig
     presets: Dict[str, Preset]
-    require_gitlab_auth: bool
     room_name: str
-    gitlab_client_id: Optional[str]
-    gitlab_client_secret: Optional[str]
-    gitlab_group: Optional[List[str]]
-    gitlab_url: Optional[str]
     server_url: str
     video_only_sources: List[str]
     recordings: Path
+
+
+@dataclass
+class AuthGitLab(AuthConfig):
+    type = 'gitlab'
+    client_id: str
+    client_secret: str
+    group: Optional[List[str]]
+    name: str
+    url: str
+
+
+@dataclass
+class AuthPassword(AuthConfig):
+    type = 'password'
+    htpassdb: str
 
 
 def parse_config_list(config, key):
@@ -37,10 +53,24 @@ def parse_config(config_file):
     cfgp = configparser.ConfigParser()
     cfgp.read(config_file)
 
+    auth = None
     presets = {}
     for section_name in cfgp.sections():
         section = cfgp[section_name]
-        if section_name.startswith('preset:'):
+        if section_name.startswith('auth:') and auth is not None:
+            raise Exception(
+                'Only a single auth backend can be enabled in config.')
+        if section_name == 'auth:gitlab':
+            auth = AuthGitLab(
+                client_id=section.get('client_id'),
+                client_secret=section.get('client_secret'),
+                group=section.get('group'),
+                name=section.get('name'),
+                url=section.get('url'),
+            )
+        elif section_name == 'auth:password':
+            auth = AuthPassword(htpassdb=section.get('htpassdb'))
+        elif section_name.startswith('preset:'):
             id_ = section_name.split(':', 1)[1]
             presets[id_] = Preset(
                 audio_solo=parse_config_list(section, 'audio_solo'),
@@ -53,14 +83,10 @@ def parse_config(config_file):
     vogol = cfgp['vogol']
     config = Config(
         host=vogol['host'],
+        auth=auth,
         presets=presets,
-        require_gitlab_auth=vogol.getboolean('require_gitlab_auth'),
         recordings=Path(vogol['recordings']),
         room_name=vogol['room_name'],
-        gitlab_client_id=vogol.get('gitlab_client_id'),
-        gitlab_client_secret=vogol.get('gitlab_client_secret'),
-        gitlab_group=vogol.get('gitlab_group'),
-        gitlab_url=vogol.get('gitlab_url'),
         server_url=vogol['server_url'],
         video_only_sources=parse_config_list(vogol, 'video_only_sources'),
     )

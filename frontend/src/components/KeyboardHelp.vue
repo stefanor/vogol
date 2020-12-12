@@ -80,12 +80,20 @@
 
 <script>
 import {BModal} from 'bootstrap-vue';
+import {mapState} from 'vuex';
+
 export default {
   components: {
     BModal,
   },
+  computed: mapState({
+    connected: state => state.voctomix.connected,
+  }),
   methods: {
     on_key_down(ev) {
+      if (!this.connected) {
+        return;
+      }
       if (ev.key == '?') {
         ev.preventDefault();
         this.$bvModal.show('keyboard-shortcuts');

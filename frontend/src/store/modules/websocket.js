@@ -56,8 +56,9 @@ const actions = {
     commit('remove_error', 'ws');
   },
 
-  logout({commit}) {
+  logout({commit}, config) {
     commit('logout');
+    commit('auth_display', config);
   },
 
   ws_message_raw({dispatch}, ev) {
@@ -73,8 +74,8 @@ const actions = {
   ws_message_deserialized({commit}, body) {
     switch (body.type) {
       case 'config':
+        commit('auth_config', body.config);
         commit('presets_config', body.config);
-        commit('user_config', body.config);
         commit('voctomix_config', body.config);
         commit('websocket_config', body.config);
         break;
@@ -118,12 +119,15 @@ const actions = {
       priority: 100,
     });
     commit('disconnected');
+    commit('voctomix_state_update', {connected: false});
     // We can't see 403s from WebSockets
     fetch('/ws', {
       credentials: 'same-origin',
     }).then(response => {
       if (response.status == 403) {
-        dispatch('logout');
+        response.json().then(body => {
+          dispatch('logout', body);
+        });
       }
     });
   },
@@ -135,6 +139,7 @@ const actions = {
       priority: 100,
     });
     commit('disconnected');
+    commit('voctomix_state_update', {connected: false});
     setTimeout(() => dispatch('connect'), 1000);
   },
 

@@ -106,6 +106,7 @@ export default {
   },
   computed: Object.assign(
     mapState({
+      is_connected: state => state.voctomix.connected,
       is_fullscreen(state) {
         return state.voctomix.composite_mode == 'fullscreen' && this.source_a;
       },
@@ -167,6 +168,10 @@ export default {
       this.send('fullscreen_solo');
     },
     on_key_down(ev) {
+      console.log(this.is_connected);
+      if (!this.is_connected) {
+        return;
+      }
       const source_number = this.index + 1;
       if (ev.key == source_number && !ev.shiftKey && !ev.altKey) {
         if (!ev.ctrlKey) {
